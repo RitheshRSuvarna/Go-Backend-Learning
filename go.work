@@ -1,0 +1,8 @@
+go 1.25.0
+
+use (
+	./cmd/api
+	./internal/module/trips
+	./internal/platform/common
+	./internal/platform/postgres
+)
