@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:16
+    container_name: postgres-db
+    restart: always
+
+    environment:
+      POSTGRES_USER: example
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: mydb
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    shm_size: 128mb
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+
+    ports:
+      - "8081:8080"
+
+volumes:
+  postgres_data:

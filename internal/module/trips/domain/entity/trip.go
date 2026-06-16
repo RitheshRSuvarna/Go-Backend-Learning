@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type Trip struct {
+type 	Trip struct {
 	id          common.TripID
 	destination string
 	startDate   string

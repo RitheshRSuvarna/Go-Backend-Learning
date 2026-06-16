@@ -10,7 +10,7 @@ type TripDTO struct {
 	Destination    string
 	StartDate      string
 	EndDate        string
-	TravelersCount int
+	TravelersCount int	
 	CreatedAt      string
 }
 
@@ -24,3 +24,4 @@ func ToTripDTO(t *entity.Trip) TripDTO {
 		CreatedAt:      t.CreatedAt().Format(time.RFC3339),
 	}
 }
+	
