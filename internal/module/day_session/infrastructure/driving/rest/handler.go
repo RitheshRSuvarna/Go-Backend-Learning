@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"common"
 	"day_session/application/command"
 	"day_session/application/services"
 	"encoding/json"
@@ -10,12 +11,14 @@ import (
 type Handler struct {
 	createDaysession *services.CreateDaySessionService
 	listDaysession   *services.ListDaySessionService
+	listDaysessionID *services.ListDaySessionServiceID
 }
 
-func NewHandler(createds *services.CreateDaySessionService, listds *services.ListDaySessionService) *Handler {
+func NewHandler(createds *services.CreateDaySessionService, listds *services.ListDaySessionService, listdsid *services.ListDaySessionServiceID) *Handler {
 	return &Handler{
 		createDaysession: createds,
 		listDaysession:   listds,
+		listDaysessionID: listdsid,
 	}
 }
 
@@ -68,12 +71,60 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
-	daysession, err := h.listDaysession.GetByID(r.Context(), r.)
+	id := r.PathValue("id")
+
+	daysessionID, err := common.NewDaySessionID(id)
+	if err != nil {
+		writeDomainError(w, r, err)
+		return
+	}
+
+	daySession, err := h.listDaysessionID.GetByID(
+		r.Context(),
+		daysessionID,
+	)
 	if err != nil {
 		writeDomainError(w, r, err)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(daysession)
+
+	if err := json.NewEncoder(w).Encode(daySession); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func (h *Handler) getByTripIDAndDate(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	tripID := r.URL.Query().Get("trip_id")
+	date := r.URL.Query().Get("date")
+
+	domainTripID, err := common.NewTripID(tripID)
+	if err != nil {
+		writeDomainError(w, r, err)
+		return
+	}
+
+	daySession, err := h.listDaysession.GetByTripIDAndDate(
+		r.Context(),
+		domainTripID,
+		date,
+	)
+	if err != nil {
+		writeDomainError(w, r, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	if err := json.NewEncoder(w).Encode(daySession); err != nil {
+		http.Error(
+			w,
+			err.Error(),
+			http.StatusInternalServerError,
+		)
+	}
 }

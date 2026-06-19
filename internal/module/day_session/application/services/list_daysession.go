@@ -1,24 +1,23 @@
 package services
 
 import (
-	"context"
 	"common"
-	"day_session/domain/repository"
-	"day_session/application/command"
+	"context"
 	"day_session/application/dto"
+	"day_session/domain/repository"
 )
 
-type ListDaySessionServiceID struct {
+type ListDaySessionService struct {
 	dayrepo repository.DaySessionRepository
 }
 
-func NewListDaySessionService(dayrepo repository.DaySessionRepository) *ListDaySessionServiceID {
-	return &ListDaySessionServiceID{dayrepo: dayrepo}
+func NewListDaySessionService(dayrepo repository.DaySessionRepository) *ListDaySessionService {
+	return &ListDaySessionService{dayrepo: dayrepo}
 }
 
-func (d* ListDaySessionServiceID) GetByIDAndDate(ctx context.Context, cmd command.CreateDaySessionCommand, tripid common.TripID) (dto.DaySessionDTO, error) {
+func (d *ListDaySessionService) GetByTripIDAndDate(ctx context.Context, tripid common.TripID, date string) (dto.DaySessionDTO, error) {
 	daysession, err := d.dayrepo.GetByTripIDAndDate(
-		ctx, cmd.Date, tripid,
+		ctx, tripid, date,
 	)
 	if err != nil {
 		return dto.DaySessionDTO{}, err

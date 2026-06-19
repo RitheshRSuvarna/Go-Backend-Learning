@@ -54,8 +54,8 @@ func (q *Queries) CreateDaySession(ctx context.Context, arg CreateDaySessionPara
 
 const getByID = `-- name: GetByID :one
 SELECT id, trip_id, date, start_time, start_label, created_at
-FROM day_sessions
-ORDER BY created_at DESC
+FROM day_sessions 
+WHERE id= $1
 `
 
 type GetByIDRow struct {
@@ -67,8 +67,8 @@ type GetByIDRow struct {
 	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 }
 
-func (q *Queries) GetByID(ctx context.Context) (GetByIDRow, error) {
-	row := q.db.QueryRow(ctx, getByID)
+func (q *Queries) GetByID(ctx context.Context, id pgtype.UUID) (GetByIDRow, error) {
+	row := q.db.QueryRow(ctx, getByID, id)
 	var i GetByIDRow
 	err := row.Scan(
 		&i.ID,
@@ -83,9 +83,16 @@ func (q *Queries) GetByID(ctx context.Context) (GetByIDRow, error) {
 
 const getDaySessionByIDAndDate = `-- name: GetDaySessionByIDAndDate :one
 SELECT id, trip_id, date, start_time, start_label, created_at
-FROM day_sessions
-ORDER BY created_at DESC
+FROM day_sessions 
+WHERE trip_id = $1
+AND date = $2
+LIMIT 1
 `
+
+type GetDaySessionByIDAndDateParams struct {
+	TripID pgtype.UUID `json:"trip_id"`
+	Date   pgtype.Date `json:"date"`
+}
 
 type GetDaySessionByIDAndDateRow struct {
 	ID         pgtype.UUID        `json:"id"`
@@ -96,8 +103,8 @@ type GetDaySessionByIDAndDateRow struct {
 	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 }
 
-func (q *Queries) GetDaySessionByIDAndDate(ctx context.Context) (GetDaySessionByIDAndDateRow, error) {
-	row := q.db.QueryRow(ctx, getDaySessionByIDAndDate)
+func (q *Queries) GetDaySessionByIDAndDate(ctx context.Context, arg GetDaySessionByIDAndDateParams) (GetDaySessionByIDAndDateRow, error) {
+	row := q.db.QueryRow(ctx, getDaySessionByIDAndDate, arg.TripID, arg.Date)
 	var i GetDaySessionByIDAndDateRow
 	err := row.Scan(
 		&i.ID,

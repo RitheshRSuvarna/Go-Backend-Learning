@@ -4,6 +4,7 @@ use (
 	./cmd/api
 	./internal/module/trips
 	./internal/module/day_session
+	./internal/module/plan
 	./internal/platform/common
 	./internal/platform/postgres
 )

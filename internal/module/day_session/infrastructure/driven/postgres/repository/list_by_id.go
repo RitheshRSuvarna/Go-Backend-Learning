@@ -1,21 +1,24 @@
 package repository
 
 import (
-	"context"
 	"common"
+	"context"
 	"day_session/domain/entity"
-	dsqueries "day_session/infrastructure/driven/postgres/queries/day_session"
 	"fmt"
 )
 
 func (r *PostgresDaySessionRepository) GetByID(
 	ctx context.Context,
-	id common.ID,
+	id common.DaySessionID,
 ) (*entity.DaySession, error) {
+	pgID, err := uuidStringToPgUUID(id.String())
+	if err != nil {
+		return nil, err
+	}
 
 	row, err := r.getQueries(ctx).GetByID(
 		ctx,
-		id.String(),
+		pgID,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get day session: %w", err)

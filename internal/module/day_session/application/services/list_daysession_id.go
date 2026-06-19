@@ -7,15 +7,15 @@ import (
 	"day_session/domain/repository"
 )
 
-type ListDaySessionService struct {
+type ListDaySessionServiceID struct {
 	dayrepo repository.DaySessionRepository
 }
 
-func NewDaySessionListService(dayrepo repository.DaySessionRepository) *ListDaySessionService {
-	return &ListDaySessionService{dayrepo: dayrepo}
+func NewDaySessionListService(dayrepo repository.DaySessionRepository) *ListDaySessionServiceID {
+	return &ListDaySessionServiceID{dayrepo: dayrepo}
 }
 
-func (d *ListDaySessionService) GetByID(ctx context.Context, id common.DaySessionID) (dto.DaySessionDTO, error) {
+func (d *ListDaySessionServiceID) GetByID(ctx context.Context, id common.DaySessionID) (dto.DaySessionDTO, error) {
 	daysession, err := d.dayrepo.GetByID(
 		ctx, id,
 	)

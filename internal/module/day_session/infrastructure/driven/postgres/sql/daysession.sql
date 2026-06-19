@@ -5,10 +5,12 @@ RETURNING id, trip_id, date, start_time, start_label, created_at;
 
 -- name: GetDaySessionByIDAndDate :one
 SELECT id, trip_id, date, start_time, start_label, created_at
-FROM day_sessions
-ORDER BY created_at DESC;
+FROM day_sessions 
+WHERE trip_id = $1
+AND date = $2
+LIMIT 1;
 
 -- name: GetByID :one
 SELECT id, trip_id, date, start_time, start_label, created_at
-FROM day_sessions
-ORDER BY created_at DESC;
+FROM day_sessions 
+WHERE id= $1;
