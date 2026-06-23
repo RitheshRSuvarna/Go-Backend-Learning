@@ -19,15 +19,15 @@ type PlanStopDTO struct {
 	CreatedAt        string
 }
 
-func NewPlanStopDTO(p *entity.PlanStop) PlanStopDTO {
-	return &PlanStopDTO{
-		PlanversionID:    p.PlanVersionID().Sting(),
+func ToPlanStopDTO(p *entity.PlanStop) PlanStopDTO {
+	return PlanStopDTO{
+		PlanversionID:    p.PlanVersionID().String(),
 		Position:         p.Position(),
 		Title:            p.Title(),
 		CategoryLabel:    p.CategoryLabel(),
 		ImageURL:         p.URL(),
-		PlannedArrival:   p.PlannedArrival(),
-		PlannedDeparture: p.PlannedDeparture(),
+		PlannedArrival:   p.PlannedArrival().String(),
+		PlannedDeparture: p.PlannedDeparture().String(),
 		TravelMinutes:    p.TravelMinutes(),
 		StayMinutes:      p.StayMinutes(),
 		BusyRiskLabel:    p.BusyRiskLabel(),

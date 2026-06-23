@@ -1,4 +1,4 @@
-package domain
+package entity
 
 import (
 	"common"
@@ -21,45 +21,45 @@ type PlanStop struct {
 }
 
 func NewPlanStop(planversionid common.PlanVersionID, position int, title,
-	categoryLabel, imageURL string, plannedArrival, plannedDeparture time.Time, travelMinutes, stayMinutes int, busyRiskLabel string) (PlanStop, error) {
-	if planversionid == "" {
-		return nil, common.NewValidationError("plan version id is required", err)
+	categoryLabel, imageURL string, plannedArrival, plannedDeparture time.Time, travelMinutes, stayMinutes int, busyRiskLabel string) (*PlanStop, error) {
+	if planversionid.String() == "" {
+		return nil, common.NewValidationError("plan version id is required", nil)
 	}
 
 	if position == 0 {
-		return nil, common.NewValidationError("position must be >0", err)
+		return nil, common.NewValidationError("position must be >0", nil)
 	}
 
 	if title == "" {
-		return nil, common.NewValidationError("title is required", err)
+		return nil, common.NewValidationError("title is required", nil)
 	}
 
 	if categoryLabel == "" {
-		return nil, common.NewValidationError("category label is required", err)
+		return nil, common.NewValidationError("category label is required", nil)
 	}
 
 	if imageURL == "" {
-		return nil, common.NewValidationError("image URL is required", err)
+		return nil, common.NewValidationError("image URL is required", nil)
 	}
 
-	if plannedArrival == "" {
-		return nil, common.NewValidationError("Arrival time is required", err)
+	if plannedArrival.String() == "" {
+		return nil, common.NewValidationError("Arrival time is required", nil)
 	}
 
-	if plannedDeparture == "" {
-		return nil, common.NewValidationError("Departure time is required", err)
+	if plannedDeparture.String() == "" {
+		return nil, common.NewValidationError("Departure time is required", nil)
 	}
 
 	if travelMinutes == 0 {
-		return nil, common.NewValidationError("Travel minutes must be > 0", err)
+		return nil, common.NewValidationError("Travel minutes must be > 0", nil)
 	}
 
 	if stayMinutes == 0 {
-		return nil, common.NewValidationError("stay minutes must be > 0", err)
+		return nil, common.NewValidationError("stay minutes must be > 0", nil)
 	}
 
 	if busyRiskLabel == "" {
-		return nil, common.NewValidationError("busy label is required", err)
+		return nil, common.NewValidationError("busy label is required", nil)
 	}
 
 	now := common.Now()
@@ -75,23 +75,24 @@ func NewPlanStop(planversionid common.PlanVersionID, position int, title,
 		travelMinutes:    travelMinutes,
 		stayMinutes:      stayMinutes,
 		busyRiskLabel:    busyRiskLabel,
-		createdAt:        createdAt,
+		createdAt:        now,
 	}, nil
 }
 
-func (p *PlanStop) ID() common.PlanStopID       { return p.id }
-func (p *PlanStop) Position() int               { return p.position }
-func (p *PlanStop) Title() string               { return p.title }
-func (p *PlanStop) CategoryLabel() string       { return p.categoryLabel }
-func (p *PlanStop) URL() string                 { return p.imageURL }
-func (p *PlanStop) PlannedArrival() time.Time   { return p.plannedArival }
-func (p *PlanStop) PlannedDeparture() time.Time { return p.plannedDeparture }
-func (p *PlanStop) TravelMinutes() int          { return p.travelMinutes }
-func (p *PlanStop) StayMinutes() int            { return p.stayMinutes }
-func (p *PlanStop) BusyRiskLable() string       { return p.busyRiskLabel }
-func (p *PlanStop) CreatedAt() common.Time      { return p.createdAt }
+func (p *PlanStop) ID() common.PlanStopID               { return p.id }
+func (p *PlanStop) PlanVersionID() common.PlanVersionID { return p.planversionid }
+func (p *PlanStop) Position() int                       { return p.position }
+func (p *PlanStop) Title() string                       { return p.title }
+func (p *PlanStop) CategoryLabel() string               { return p.categoryLabel }
+func (p *PlanStop) URL() string                         { return p.imageURL }
+func (p *PlanStop) PlannedArrival() time.Time           { return p.plannedArrival }
+func (p *PlanStop) PlannedDeparture() time.Time         { return p.plannedDeparture }
+func (p *PlanStop) TravelMinutes() int                  { return p.travelMinutes }
+func (p *PlanStop) StayMinutes() int                    { return p.stayMinutes }
+func (p *PlanStop) BusyRiskLabel() string               { return p.busyRiskLabel }
+func (p *PlanStop) CreatedAt() common.Time              { return p.createdAt }
 
-func (p *PlanStop) SetID(value string) {
+func (p *PlanStop) SetID(id common.PlanStopID) {
 	p.id = id
 }
 
@@ -115,13 +116,13 @@ func RestorePlanStop(
 		planversionid:    planversionid,
 		position:         position,
 		title:            title,
-		categoryLabel:    categoryLable,
-		imageUrl:         imageURL,
+		categoryLabel:    categoryLabel,
+		imageURL:         imageURL,
 		plannedArrival:   plannedArrival,
 		plannedDeparture: plannedDeparture,
 		travelMinutes:    travelMinutes,
 		stayMinutes:      stayMinutes,
-		busyRiskLabel:    busyRiskLable,
+		busyRiskLabel:    busyRiskLabel,
 		createdAt:        createdAt,
 	}
 }

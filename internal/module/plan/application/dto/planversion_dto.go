@@ -14,11 +14,11 @@ type PlanVersionDTO struct {
 }
 
 func ToPlanVersionDTO(p *entity.PlanVersion) PlanVersionDTO {
-	return &PlanVersionDTO{
+	return PlanVersionDTO{
 		ID:           p.ID().String(),
-		DaysessionID: p.DaysessionID(),
+		DaysessionID: p.DaySessionID().String(),
 		Version:      p.Version(),
 		Note:         p.Note(),
-		CreateAt:     p.CreatedAt().Formate(time.RFC3339),
+		CreatedAt:    p.CreatedAt().Format(time.RFC3339),
 	}
 }

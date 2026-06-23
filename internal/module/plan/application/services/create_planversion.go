@@ -1,11 +1,12 @@
 package services
 
 import (
+	"common"
 	"context"
-	"plan/domain/entity"
-	"plan/domain/repository"
 	"plan/application/command"
 	"plan/application/dto"
+	"plan/domain/entity"
+	"plan/domain/repository"
 )
 
 type CreatePlanVersionService struct {
@@ -16,6 +17,13 @@ func NewCreatePlanVersionService(versionrepo repository.PlanVersionRepository) *
 	return &CreatePlanVersionService{versionrepo: versionrepo}
 }
 
-func (s *CreatePlanVerisonService) CreatePlanVersion(ctx context.Context, cmd command.CreatePlanVersionCommand) (dto.PlanVersionDTO, error) {
-	version, err := entity.NewPlanVersion()
+func (s *CreatePlanVersionService) CreatePlanVersion(ctx context.Context, id common.DaySessionID, cmd command.CreatePlanVersionCommand) (dto.PlanVersionDTO, error) {
+	version, err := entity.NewPlanVersion(id, cmd.Version, cmd.Note)
+	if err != nil {
+		return dto.PlanVersionDTO{}, err
+	}
+	if err = s.versionrepo.Create(ctx, version); err != nil {
+		return dto.PlanVersionDTO{}, err
+	}
+	return dto.ToPlanVersionDTO(version), nil
 }

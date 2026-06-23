@@ -1,8 +1,7 @@
-package domain
+package entity
 
 import (
 	"common"
-	"time"
 )
 
 type PlanVersion struct {
@@ -14,10 +13,10 @@ type PlanVersion struct {
 }
 
 func NewPlanVersion(daysessionid common.DaySessionID, version int, note string) (*PlanVersion, error) {
-	if daysessionid == "" {
+	if daysessionid.String() == "" {
 		return nil, common.NewValidationError("day_sessionID is required", nil)
 	}
-	if version == "" {
+	if version == 0 {
 		return nil, common.NewValidationError("version must be >=1", nil)
 	}
 	if note == "" {
@@ -58,7 +57,7 @@ func RestorePlanVersion(
 ) *PlanVersion {
 	return &PlanVersion {
 		id: id,
-		daysessionid: daysessionid.
+		daysessionid: daysessionid,
 		version: version,
 		note: note,
 		createdAt: createdAt,
