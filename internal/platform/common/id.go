@@ -77,7 +77,7 @@ func GeneratePlanVersionID() PlanVersionID {
 
 type PlanStopID ID
 
-func NewPlanStop(value string) (PlanStopID, error) {
+func NewPlanStopID(value string) (PlanStopID, error) {
 	id, err := NewID(value)
 	if err != nil {
 		return PlanStopID{}, err

@@ -18,7 +18,7 @@ func NewDaySessionRepository(pool *pgxpool.Pool) *PostgresDaySessionRepository {
 	return &PostgresDaySessionRepository{
 		pool: pool,
 		queries: dsqueries.New(pool),
-	}
+	}	
 }
 
 func (r *PostgresDaySessionRepository) getQueries(ctx context.Context) *dsqueries.Queries {

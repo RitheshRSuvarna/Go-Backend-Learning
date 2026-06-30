@@ -1,8 +1,12 @@
 package command
 
-import "time"
+import (
+	"time"
+	"common"
+)
 
 type CreatePlanStopCommand struct {
+	PlanVersionID    common.PlanVersionID
 	Position         int
 	Title            string
 	CategoryLabel    string
