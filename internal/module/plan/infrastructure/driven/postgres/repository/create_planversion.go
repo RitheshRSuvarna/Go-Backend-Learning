@@ -3,9 +3,11 @@ package repository
 import (
 	"common"
 	"context"
+	"fmt"
 	"plan/domain/entity"
 	pvqueries "plan/infrastructure/driven/postgres/queries/plans"
-	"fmt"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func (r *PostgresPlanVersionRepository) Create(ctx context.Context, planversion *entity.PlanVersion) error {
@@ -16,8 +18,11 @@ func (r *PostgresPlanVersionRepository) Create(ctx context.Context, planversion 
 
 	row, err := r.getQueries(ctx).CreatePlanVersion(ctx, pvqueries.CreatePlanVersionParams{
 		DaySessionID: daysessionid,
-		Version: planversion.Version(),
-		Note: planversion.Note(),
+		Version:      int32(planversion.Version()),
+		Notes: pgtype.Text{
+			String: planversion.Note(),
+			Valid:  true,
+		},
 	})
 	if err != nil {
 		return fmt.Errorf("Failed to create plan version: %w", err)
@@ -26,8 +31,8 @@ func (r *PostgresPlanVersionRepository) Create(ctx context.Context, planversion 
 	created, err := rowToDomainPlanVersion(
 		row.ID,
 		row.DaySessionID,
-		row.Version,
-		row.Note,
+		int(row.Version),
+		row.Notes.String,
 		row.CreatedAt,
 	)
 	if err != nil {
@@ -35,5 +40,5 @@ func (r *PostgresPlanVersionRepository) Create(ctx context.Context, planversion 
 	}
 
 	planversion.SetID(created.ID())
-	return nil	
+	return nil
 }

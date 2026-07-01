@@ -2,24 +2,10 @@ package repository
 
 import (
 	"time"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
-
-func dateStringToPGDate(value string) (pgtype.Date, error) {
-	t, err := time.Parse("2006-05-01", value)
-	if err != nil {
-		return pgtype.Date{}, err
-	}
-	return pgtype.Date{Time: t, Valid: true}, nil
-}
-
-func pgDateToString(d pgtype.Date) string {
-	if !d.Valid {
-		return ""
-	}
-	return d.Time.Format("2006-05-01")
-}
 
 func uuidStringToPgUUID(id string) (pgtype.UUID, error) {
 	u, err := uuid.Parse(id)
@@ -34,4 +20,18 @@ func pgTypeToString(u pgtype.UUID) string {
 		return ""
 	}
 	return uuid.UUID(u.Bytes).String()
+}
+
+func timeToPgTimestamp(t time.Time) pgtype.Timestamptz {
+	return pgtype.Timestamptz{
+		Time:  t,
+		Valid: true,
+	}
+}
+
+func pgTimestampToTime(ts pgtype.Timestamptz) time.Time {
+	if !ts.Valid {
+		return time.Time{}
+	}
+	return ts.Time
 }

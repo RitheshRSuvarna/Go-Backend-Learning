@@ -16,7 +16,7 @@ func NewListStopByID(stoprepo repository.PlanStopRepository) *ListStopByIDServic
 }
 
 func (s *ListStopByIDService) ListByID(ctx context.Context, id common.PlanStopID) (dto.PlanStopDTO, error) {
-	planstop, err := s.stoprepo.GetByID(ctx, id)
+	planstop, err := s.stoprepo.GetPlanByID(ctx, id)
 	if err != nil {
 		return dto.PlanStopDTO{}, err
 	}

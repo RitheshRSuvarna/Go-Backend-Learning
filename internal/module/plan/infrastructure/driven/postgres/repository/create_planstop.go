@@ -1,11 +1,13 @@
 package repository
 
 import (
-	"context"
 	"common"
+	"context"
+	"fmt"
 	"plan/domain/entity"
 	psqueries "plan/infrastructure/driven/postgres/queries/plans"
-	"fmt"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func (r *PostgresPlanStopRepository) Create(ctx context.Context, planstop *entity.PlanStop) error {
@@ -14,16 +16,27 @@ func (r *PostgresPlanStopRepository) Create(ctx context.Context, planstop *entit
 		return common.NewValidationError("Invalid planversion id:%w", err)
 	}
 
-	row, err := r.getQueries(ctx).CreatePlanStopParams(ctx, psqueries.CreatePlanStopParams{
+	row, err := r.getQueries(ctx).CreatePlanStop(ctx, psqueries.CreatePlanStopParams{
 		PlanVersionID: planversionid,
-		Position: planstop.Position(),
-		Title: planstop.Title(),
+		Position:      int32(planstop.Position()),
+		Title:         planstop.Title(),
 		CategoryLabel: planstop.CategoryLabel(),
-		ImageURL: planstop.URL(),
-		PlannedArrival: planstop.PlannedArrival(),
-		PlannedDeparture: planstop.PlannedDeparture(),
-		TravelMinutes: planstop.TravelMinutes(),
-		StayMinutes: planstop.StayMinutes(),
+		ImageUrl: pgtype.Text{
+			String: planstop.URL(),
+			Valid:  true,
+		},
+		PlannedArrival: timeToPgTimestamp(planstop.PlannedArrival()),
+		// PlannedArrival: pgtype.Timestamptz{
+		// Time: planstop.PlannedArrival(),
+		// Valid: true,
+		// },
+		PlannedDeparture: timeToPgTimestamp(planstop.PlannedDeparture()),
+		// PlannedDeparture: pgtype.Timestamptz{
+		// Time: planstop.PlannedDeparture(),
+		// Valid: true,
+		// },
+		TravelMinutes: int32(planstop.TravelMinutes()),
+		StayMinutes:   int32(planstop.StayMinutes()),
 		BusyRiskLabel: planstop.BusyRiskLabel(),
 	})
 	if err != nil {
@@ -33,15 +46,15 @@ func (r *PostgresPlanStopRepository) Create(ctx context.Context, planstop *entit
 	created, err := rowToDomainPlanStop(
 		row.ID,
 		row.PlanVersionID,
-		row.Position,
+		int(row.Position),
 		row.Title,
 		row.CategoryLabel,
-		row.ImageURL,
-		row.PlannedArrival,
-		row.PlannedDeparture,
-		row.TravelMinutes,
-		row.StayMinutes,
-		row.BuysRiskLabel,
+		row.ImageUrl.String,
+		row.PlannedArrival.Time,
+		row.PlannedDeparture.Time,
+		int(row.TravelMinutes),
+		int(row.StayMinutes),
+		row.BusyRiskLabel,
 		row.CreatedAt,
 	)
 	if err != nil {

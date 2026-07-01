@@ -16,7 +16,7 @@ func NewGetByIDPlanVersionService(versionrepo repository.PlanVersionRepository) 
 }
 
 func (s *GetByIDPlanVersionService) GetPlanVersionByID(ctx context.Context, id common.PlanVersionID) (dto.PlanVersionDTO, error) {
-	planversion, err := s.versionrepo.GetVersion(ctx, id)
+	planversion, err := s.versionrepo.GetVersionByID(ctx, id)
 	if err != nil {
 		return dto.PlanVersionDTO{}, err
 	}

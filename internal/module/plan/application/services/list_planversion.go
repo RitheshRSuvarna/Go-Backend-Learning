@@ -16,7 +16,7 @@ func NewListPlanVersionService(versionrepo repository.PlanVersionRepository) *Li
 }
 
 func (s *ListPlanVerionservice) ListVersion(ctx context.Context, id common.DaySessionID) ([]dto.PlanVersionDTO, error) {
-	planversion, err := s.versionrepo.ListVerion(ctx, id)
+	planversion, err := s.versionrepo.ListPlanVersion(ctx, id)
 	if err != nil {
 		return nil, err
 	}

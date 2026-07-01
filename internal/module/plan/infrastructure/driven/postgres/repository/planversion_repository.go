@@ -1,22 +1,22 @@
 package repository
 
-import(
+import (
 	"context"
-	platformpostgres "postgres"
 	"plan/domain/repository"
 	pvqueries "plan/infrastructure/driven/postgres/queries/plans"
+	platformpostgres "postgres"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type PostgresPlanVersionRepository struct {
-	pool *pgxpool.Pool
+	pool    *pgxpool.Pool
 	queries *pvqueries.Queries
 }
 
 func NewPostgresPlanVersionRepository(pool *pgxpool.Pool) *PostgresPlanVersionRepository {
 	return &PostgresPlanVersionRepository{
-		pool: pool,
+		pool:    pool,
 		queries: pvqueries.New(pool),
 	}
 }

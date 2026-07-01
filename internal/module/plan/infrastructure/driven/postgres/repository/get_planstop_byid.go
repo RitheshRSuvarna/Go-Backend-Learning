@@ -1,20 +1,20 @@
 package repository
 
 import (
-	"fmt"
 	"common"
 	"context"
+	"fmt"
 	"plan/domain/entity"
-	psqueries "plan/infrastructure/driven/postgres/queries/plans"
+	// psqueries "plan/infrastructure/driven/postgres/queries/plans"
 )
 
-func (r *PostgresPlanStopRepository) GetByID(ctx context.Context, id common.PlanVersionID) (*entity.PlanStop, error) {
+func (r *PostgresPlanStopRepository) GetPlanByID(ctx context.Context, id common.PlanStopID) (*entity.PlanStop, error) {
 	pgid, err := uuidStringToPgUUID(id.String())
 	if err != nil {
 		return nil, err
 	}
 
-	row, err :=r.getQueries(ctx).GetByID(ctx, pgid)
+	row, err := r.getQueries(ctx).GetPlanStopByID(ctx, pgid)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to get plan stop:%w", err)
 	}
@@ -22,15 +22,15 @@ func (r *PostgresPlanStopRepository) GetByID(ctx context.Context, id common.Plan
 	planstop, err := rowToDomainPlanStop(
 		row.ID,
 		row.PlanVersionID,
-		row.Position,
+		int(row.Position),
 		row.Title,
 		row.CategoryLabel,
-		row.ImageURL,
-		row.PlannedArrival,
-		row.PlannedDeparture,
-		row.TravelMinutes,
-		row.StayMinutes,
-		row.BuysRiskLabel,
+		row.ImageUrl.String,
+		row.PlannedArrival.Time,
+		row.PlannedDeparture.Time,
+		int(row.TravelMinutes),
+		int(row.StayMinutes),
+		row.BusyRiskLabel,
 		row.CreatedAt,
 	)
 	if err != nil {
