@@ -45,7 +45,7 @@ func main() {
 	mux.Handle("/api/plan-stop/", http.StripPrefix("/api", initPlanStopHandler(db)))
 	mux.HandleFunc("/health", healthHandler(db))
 
-	log.Printf("Trips API: http://localhost:%s/api/trips", port)
+	log.Printf("Trips API: http://localhost:%s/api", port)
 	log.Fatal(http.ListenAndServe(":"+port, mux))
 
 }
