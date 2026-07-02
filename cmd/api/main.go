@@ -40,6 +40,9 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.Handle("/api/", http.StripPrefix("/api", initTripHandler(db)))
+	mux.Handle("/api/day-sessions/", http.StripPrefix("/api", initDaySessionHandler(db)))
+	mux.Handle("/api/plan-version/", http.StripPrefix("/api", initPlanVersionHandler(db)))
+	mux.Handle("/api/plan-stop/", http.StripPrefix("/api", initPlanStopHandler(db)))
 	mux.HandleFunc("/health", healthHandler(db))
 
 	log.Printf("Trips API: http://localhost:%s/api/trips", port)
@@ -79,7 +82,7 @@ func initPlanVersionHandler(db *pgxpool.Pool) http.Handler {
 	return planversionrest.NewHandler(createPlanVersionSvc, getPlanVersionSvc, listPlanVersionSvc)
 }
 
-func initPlanHandler(db *pgxpool.Pool) http.Handler {
+func initPlanStopHandler(db *pgxpool.Pool) http.Handler {
 	planRepo := planrepository.NewPlanStopRepository(db)
 	createPlanStopSvc := planservice.NewCreatePlanStopService(planRepo)
 	getPlanStopSvc := planservice.NewGetStopByIDService(planRepo)

@@ -24,7 +24,7 @@ func NewHandler(createds *services.CreateDaySessionService, listds *services.Lis
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	if r.URL.Path != "/day_session" {
+	if r.URL.Path != "/day-session" {
 		writeError(w, r, http.StatusNotFound, "not_found", "not found")
 		return
 	}

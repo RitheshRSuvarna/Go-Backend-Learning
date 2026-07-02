@@ -24,7 +24,7 @@ func NewHandlers(createps *services.CreatePlanStopService, getps *services.GetSt
 }
 
 func (h *Handlers) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/Planstop" {
+	if r.URL.Path != "/plan-stop" {
 		writeError(w, r, http.StatusNotFound, "not_found", "not found")
 		return
 	}

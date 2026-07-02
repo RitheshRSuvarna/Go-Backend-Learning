@@ -23,7 +23,7 @@ func NewHandler(createpv *services.CreatePlanVersionService, getpv *services.Get
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/planversions" {
+	if r.URL.Path != "/plan-versions" {
 		writeError(w, r, http.StatusNotFound, "not_found", "not found")
 		return
 	}
