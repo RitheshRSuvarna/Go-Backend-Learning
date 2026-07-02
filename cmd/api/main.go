@@ -40,7 +40,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.Handle("/api/", http.StripPrefix("/api", initTripHandler(db)))
-	mux.Handle("/api/day-sessions/", http.StripPrefix("/api", initDaySessionHandler(db)))
+	mux.Handle("/api/day-session/", http.StripPrefix("/api", initDaySessionHandler(db)))
 	mux.Handle("/api/plan-version/", http.StripPrefix("/api", initPlanVersionHandler(db)))
 	mux.Handle("/api/plan-stop/", http.StripPrefix("/api", initPlanStopHandler(db)))
 	mux.HandleFunc("/health", healthHandler(db))
