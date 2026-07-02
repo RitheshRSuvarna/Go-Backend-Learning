@@ -14,7 +14,7 @@ type PostgresPlanVersionRepository struct {
 	queries *pvqueries.Queries
 }
 
-func NewPostgresPlanVersionRepository(pool *pgxpool.Pool) *PostgresPlanVersionRepository {
+func NewPlanVersionRepository(pool *pgxpool.Pool) *PostgresPlanVersionRepository {
 	return &PostgresPlanVersionRepository{
 		pool:    pool,
 		queries: pvqueries.New(pool),

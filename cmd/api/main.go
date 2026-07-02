@@ -8,6 +8,13 @@ import (
 	"os"
 	"time"
 
+	daysessionservice "day_session/application/services"
+	daysessionrepository "day_session/infrastructure/driven/postgres/repository"
+	daysessionrest "day_session/infrastructure/driving/rest"
+	planservice "plan/application/services"
+	planrepository "plan/infrastructure/driven/postgres/repository"
+	planstoprest "plan/infrastructure/driving/rest"
+	planversionrest "plan/infrastructure/driving/rest"
 	platformpostgres "postgres"
 	tripservice "trip/application/services"
 	triprepository "trip/infrastructure/driven/postgres/repository"
@@ -54,6 +61,30 @@ func initTripHandler(db *pgxpool.Pool) http.Handler {
 	createSvc := tripservice.NewCreateTripService(repo)
 	listSvc := tripservice.NewTripListService(repo)
 	return triprest.NewHandler(createSvc, listSvc)
+}
+
+func initDaySessionHandler(db *pgxpool.Pool) http.Handler {
+	daySessionRepo := daysessionrepository.NewDaySessionRepository(db)
+	createDaySessionSvc := daysessionservice.NewDaySessionService(daySessionRepo)
+	listDaySessionSvc := daysessionservice.NewListDaySessionService(daySessionRepo)
+	getByTripIDAndDateDaySessionSvc := daysessionservice.NewDaySessionListService(daySessionRepo)
+	return daysessionrest.NewHandler(createDaySessionSvc, listDaySessionSvc, getByTripIDAndDateDaySessionSvc)
+}
+
+func initPlanVersionHandler(db *pgxpool.Pool) http.Handler {
+	planVersionRepo := planrepository.NewPlanVersionRepository(db)
+	createPlanVersionSvc := planservice.NewCreatePlanVersionService(planVersionRepo)
+	getPlanVersionSvc := planservice.NewGetByIDPlanVersionService(planVersionRepo)
+	listPlanVersionSvc := planservice.NewListPlanVersionService(planVersionRepo)
+	return planversionrest.NewHandler(createPlanVersionSvc, getPlanVersionSvc, listPlanVersionSvc)
+}
+
+func initPlanHandler(db *pgxpool.Pool) http.Handler {
+	planRepo := planrepository.NewPlanStopRepository(db)
+	createPlanStopSvc := planservice.NewCreatePlanStopService(planRepo)
+	getPlanStopSvc := planservice.NewGetStopByIDService(planRepo)
+	listPlanStopSvc := planservice.NewListPlanStopService(planRepo)
+	return planstoprest.NewHandlers(createPlanStopSvc, getPlanStopSvc, listPlanStopSvc)
 }
 
 func healthHandler(db *pgxpool.Pool) http.HandlerFunc {

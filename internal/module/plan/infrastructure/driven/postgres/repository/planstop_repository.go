@@ -14,7 +14,7 @@ type PostgresPlanStopRepository struct {
 	queries *psqueries.Queries
 }
 
-func NewPostgresPlanStopRepository(pool *pgxpool.Pool) *PostgresPlanStopRepository {
+func NewPlanStopRepository(pool *pgxpool.Pool) *PostgresPlanStopRepository {
 	return &PostgresPlanStopRepository{
 		pool:    pool,
 		queries: psqueries.New(pool),

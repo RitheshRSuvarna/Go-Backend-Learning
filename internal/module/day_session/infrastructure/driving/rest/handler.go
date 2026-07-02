@@ -28,12 +28,15 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeError(w, r, http.StatusNotFound, "not_found", "not found")
 		return
 	}
-
 	switch r.Method {
 	case http.MethodPost:
 		h.create(w, r)
 	case http.MethodGet:
-		h.list(w, r)
+		if r.PathValue("id") != "" {
+			h.list(w, r)
+		} else if r.URL.Query().Get("trip_id") != "" && r.URL.Query().Get("date") != "" {
+			h.getByTripIDAndDate(w, r)
+		}
 	default:
 		writeError(w, r, http.StatusMethodNotAllowed, "bad_request", "method not allowed")
 	}
@@ -70,31 +73,6 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(daysession)
 }
 
-func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
-
-	daysessionID, err := common.NewDaySessionID(id)
-	if err != nil {
-		writeDomainError(w, r, err)
-		return
-	}
-
-	daySession, err := h.listDaysessionID.GetByID(
-		r.Context(),
-		daysessionID,
-	)
-	if err != nil {
-		writeDomainError(w, r, err)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-
-	if err := json.NewEncoder(w).Encode(daySession); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-}
-
 func (h *Handler) getByTripIDAndDate(
 	w http.ResponseWriter,
 	r *http.Request,
@@ -126,5 +104,30 @@ func (h *Handler) getByTripIDAndDate(
 			err.Error(),
 			http.StatusInternalServerError,
 		)
+	}
+}
+
+func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
+	daysessionID, err := common.NewDaySessionID(id)
+	if err != nil {
+		writeDomainError(w, r, err)
+		return
+	}
+
+	daySession, err := h.listDaysessionID.GetByID(
+		r.Context(),
+		daysessionID,
+	)
+	if err != nil {
+		writeDomainError(w, r, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	if err := json.NewEncoder(w).Encode(daySession); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
