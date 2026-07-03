@@ -39,7 +39,7 @@ func main() {
 	port := os.Getenv("PORT")
 
 	mux := http.NewServeMux()
-	mux.Handle("/api/trip", http.StripPrefix("/api", initTripHandler(db)))
+	mux.Handle("/api/trips", http.StripPrefix("/api", initTripHandler(db)))
 	mux.Handle("/api/day-session/", http.StripPrefix("/api", initDaySessionHandler(db)))
 	mux.Handle("/api/plan-version/", http.StripPrefix("/api", initPlanVersionHandler(db)))
 	mux.Handle("/api/plan-stop/", http.StripPrefix("/api", initPlanStopHandler(db)))

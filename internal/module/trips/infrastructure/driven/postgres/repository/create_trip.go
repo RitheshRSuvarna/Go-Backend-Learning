@@ -26,7 +26,8 @@ func (r *PostgresTripRepository) Create(ctx context.Context, trip *entity.Trip) 
 		TravelersCount: int32(trip.TravelersCount()),
 	})
 	if err != nil {
-		return fmt.Errorf("Failed to create trip:%w", err)
+		fmt.Println("CreateTrip DB Error:", err)
+		return fmt.Errorf("failed to create trip: %w", err)
 	}
 
 	created, err := rowToDomainTrip(

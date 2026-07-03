@@ -28,7 +28,7 @@ func NewTrip(destination, startDate, endDate string, travelCount int) (*Trip, er
 		return nil, common.NewValidationError("end_date is required", nil)
 	}
 
-	if travelCount <= 0 {
+	if travelCount > 0 {
 		return nil, common.NewValidationError("travelers_count must be greater then zero", nil)
 	}
 
