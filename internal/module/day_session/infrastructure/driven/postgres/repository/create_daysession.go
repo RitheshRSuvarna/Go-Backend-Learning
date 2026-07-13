@@ -25,6 +25,7 @@ func (r *PostgresDaySessionRepository) Create(ctx context.Context, daysession *e
 		StartLabel: daysession.Label(),
 	})
 	if err != nil {
+		fmt.Println("CreateDaySession DB Error:", err)
 		return fmt.Errorf("filed to create session: %w", err)
 	}
 

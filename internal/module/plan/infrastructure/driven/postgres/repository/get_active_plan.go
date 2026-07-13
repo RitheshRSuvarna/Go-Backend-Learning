@@ -8,18 +8,18 @@ import (
 	// pvqueries "plan/infrastructure/driven/postgres/queries/plans"
 )
 
-func (r *PostgresPlanVersionRepository) GetVersionByID(ctx context.Context, id common.PlanVersionID) (*entity.PlanVersion, error) {
+func (r *PostgresPlanVersionRepository) GetActivePlan(ctx context.Context, id common.DaySessionID) (*entity.PlanVersion, error) {
 	pgid, err := uuidStringToPgUUID(id.String())
 	if err != nil {
 		return nil, err
 	}
 
-	row, err := r.getQueries(ctx).GetPlanVersionByID(ctx, pgid)
+	row, err := r.getQueries(ctx).GetActivePlan(ctx, pgid)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to get plan version:%w", err)
+		return nil, fmt.Errorf("Failed to get active plan:%w", err)
 	}
 
-	planversion, err := rowToDomainPlanVersion(
+	activeplan, err := rowToDomainPlanVersion(
 		row.ID,
 		row.DaySessionID,
 		int(row.Version),
@@ -30,5 +30,5 @@ func (r *PostgresPlanVersionRepository) GetVersionByID(ctx context.Context, id c
 		return nil, err
 	}
 
-	return planversion, nil
+	return activeplan, nil
 }

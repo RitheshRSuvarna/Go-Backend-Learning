@@ -84,44 +84,6 @@ func (q *Queries) CreatePlanStop(ctx context.Context, arg CreatePlanStopParams) 
 	return i, err
 }
 
-const getPlanStopByID = `-- name: GetPlanStopByID :one
-SELECT
-    id,
-    plan_version_id,
-    position,
-    title,
-    category_label,
-    image_url,
-    planned_arrival,
-    planned_departure,
-    travel_minutes,
-    stay_minutes,
-    busy_risk_label,
-    created_at
-FROM plan_stops
-WHERE id = $1
-`
-
-func (q *Queries) GetPlanStopByID(ctx context.Context, id pgtype.UUID) (PlanStop, error) {
-	row := q.db.QueryRow(ctx, getPlanStopByID, id)
-	var i PlanStop
-	err := row.Scan(
-		&i.ID,
-		&i.PlanVersionID,
-		&i.Position,
-		&i.Title,
-		&i.CategoryLabel,
-		&i.ImageUrl,
-		&i.PlannedArrival,
-		&i.PlannedDeparture,
-		&i.TravelMinutes,
-		&i.StayMinutes,
-		&i.BusyRiskLabel,
-		&i.CreatedAt,
-	)
-	return i, err
-}
-
 const listPlanStopsByPlanVersionID = `-- name: ListPlanStopsByPlanVersionID :many
 SELECT
     id,

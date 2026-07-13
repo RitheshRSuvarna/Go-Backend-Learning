@@ -6,45 +6,84 @@ import (
 	"net/http"
 	"plan/application/command"
 	"plan/application/services"
+	"strings"
 )
 
 type Handler struct {
 	createPlanVersion *services.CreatePlanVersionService
-	getPlanversion    *services.GetByIDPlanVersionService
 	listplanversion   *services.ListPlanVerionservice
+	getPlanversion    *services.GetByIDPlanVersionService
 }
 
-func NewHandler(createpv *services.CreatePlanVersionService, getpv *services.GetByIDPlanVersionService, listpv *services.ListPlanVerionservice) *Handler {
+type ActivePlanHandler struct {
+	getPlanversion    *services.GetByIDPlanVersionService
+}
+
+func NewHandler(createpv *services.CreatePlanVersionService, getpln *services.GetByIDPlanVersionService, listpv *services.ListPlanVerionservice) *Handler {
 	return &Handler{
 		createPlanVersion: createpv,
-		getPlanversion:    getpv,
+		getPlanversion: getpln,
 		listplanversion:   listpv,
 	}
 }
 
-func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/plan-versions" {
-		writeError(w, r, http.StatusNotFound, "not_found", "not found")
-		return
-	}
+// func NewActivePlanHandler(getpv *services.GetByIDPlanVersionService) *ActivePlanHandler {
+// 	return &ActivePlanHandler{
+		
+// 	}
+// }
 
-	switch r.Method {
-	case http.MethodPost:
-		h.create(w, r)
-	case http.MethodGet:
-    if r.PathValue("id") != "" {
-        h.getbyid(w, r)
-    } else if r.PathValue("daySessionID") != "" {
-        h.list(w, r)
-    } else {
-        writeError(w, r, http.StatusBadRequest,
-            "bad_request",
-            "missing identifier",
-        )
-    }
+func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
+	switch {
+
+	// GET/POST /day-sessions/{id}/plan-versions
+	case strings.HasSuffix(r.URL.Path, "/plan-versions"):
+
+		switch r.Method {
+
+		case http.MethodPost:
+			h.create(w, r)
+
+		case http.MethodGet:
+			h.list(w, r)
+
+		default:
+			writeError(
+				w,
+				r,
+				http.StatusMethodNotAllowed,
+				"bad_request",
+				"method not allowed",
+			)
+		}
+
+	// GET /day-sessions/{id}/active-plan
+	case strings.HasSuffix(r.URL.Path, "/active-plan"):
+
+		switch r.Method {
+
+		case http.MethodGet:
+			h.getactiveplan(w, r)
+
+		default:
+			writeError(
+				w,
+				r,
+				http.StatusMethodNotAllowed,
+				"bad_request",
+				"method not allowed",
+			)
+		}
 
 	default:
-		writeError(w, r, http.StatusMethodNotAllowed, "bad_request", "method not allowed")
+		writeError(
+			w,
+			r,
+			http.StatusNotFound,
+			"not_found",
+			"not found",
+		)
 	}
 }
 
@@ -108,18 +147,18 @@ func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) getbyid(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) getactiveplan(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
-	planversionID, err := common.NewPlanVersionID(id)
+	activeplan, err := common.NewDaySessionID(id)
 	if err != nil {
 		writeDomainError(w, r, err)
 		return
 	}
 
-	planversion, err := h.getPlanversion.GetPlanVersionByID(
+	planversion, err := h.getPlanversion.GetActivePlan(
 		r.Context(),
-		planversionID,
+		activeplan,
 	)
 	if err != nil {
 		writeDomainError(w, r, err)

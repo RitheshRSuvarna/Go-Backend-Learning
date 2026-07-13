@@ -5,6 +5,7 @@ import (
 	"day_session/application/command"
 	"day_session/application/services"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -23,18 +24,21 @@ func NewHandler(createds *services.CreateDaySessionService, listds *services.Lis
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
-	if r.URL.Path != "/day-session" {
+	if r.URL.Path != "/day-sessions" {
 		writeError(w, r, http.StatusNotFound, "not_found", "not found")
 		return
 	}
+
 	switch r.Method {
 	case http.MethodPost:
 		h.create(w, r)
 	case http.MethodGet:
-		if r.PathValue("id") != "" {
+		switch {
+		case r.URL.Query().Get("trip_id") != "":
 			h.list(w, r)
-		} else if r.URL.Query().Get("trip_id") != "" && r.URL.Query().Get("date") != "" {
+
+		case r.URL.Query().Get("day-session_id") != "" &&
+			r.URL.Query().Get("date") != "":
 			h.getByTripIDAndDate(w, r)
 		}
 	default:
@@ -43,19 +47,21 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type CreateDaySessionRequest struct {
-	TripID     string `json:"tripid"`
+	TripID     string `json:"trip_id"`
 	Date       string `json:"date"`
-	StartTime  string `json:"start time"`
-	StartLabel string `json:"start label"`
+	StartTime  string `json:"start_time"`
+	StartLabel string `json:"start_label"`
 }
 
 func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 	var req CreateDaySessionRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		fmt.Println("Decode error:", err)
 		writeError(w, r, http.StatusBadRequest, "bad_request", "invalid json body")
 		return
 	}
+	fmt.Printf("%+v\n", req)
 
 	daysession, err := h.createDaysession.CreateDaySession(r.Context(), command.CreateDaySessionCommand{
 		TripID:     req.TripID,

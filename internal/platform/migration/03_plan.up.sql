@@ -38,7 +38,7 @@ CREATE TABLE plan_stops (
         UNIQUE (plan_version_id, position)
 );
 
--- +goose Down
+-- -- +goose Down
 
-DROP TABLE IF EXISTS plan_stops;
-DROP TABLE IF EXISTS plan_versions;
+-- DROP TABLE IF EXISTS plan_stops;
+-- DROP TABLE IF EXISTS plan_versions;

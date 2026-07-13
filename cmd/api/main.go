@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -21,7 +22,9 @@ import (
 	triprest "trip/infrastructure/driving/rest"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/joho/godotenv"
+	"github.com/pressly/goose/v3"
 )
 
 func main() {
@@ -36,13 +39,18 @@ func main() {
 	}
 	defer db.Close()
 
+	if err := Run(ctx, db); err != nil {
+		log.Fatalf("migration failed: %v", err)
+	}
+
 	port := os.Getenv("PORT")
 
 	mux := http.NewServeMux()
+
 	mux.Handle("/api/trips", http.StripPrefix("/api", initTripHandler(db)))
-	mux.Handle("/api/day-session/", http.StripPrefix("/api", initDaySessionHandler(db)))
-	mux.Handle("/api/plan-version/", http.StripPrefix("/api", initPlanVersionHandler(db)))
-	mux.Handle("/api/plan-stop/", http.StripPrefix("/api", initPlanStopHandler(db)))
+	mux.Handle("/api/day-sessions", http.StripPrefix("/api", initDaySessionHandler(db)))
+	mux.Handle("/api/day-sessions/{id}/plan-versions/", http.StripPrefix("/api", initPlanVersionHandler(db)))
+	mux.Handle("/api/day-sessions/{id}/active-plan", http.StripPrefix("/api", initPlanStopHandler(db)))
 	mux.HandleFunc("/health", healthHandler(db))
 
 	log.Printf("Trips API: http://localhost:%s/api", port)
@@ -57,6 +65,24 @@ func loadEnv() {
 			return
 		}
 	}
+}
+
+func Run(ctx context.Context, pool *pgxpool.Pool) error {
+
+	db := stdlib.OpenDBFromPool(pool)
+	defer db.Close()
+
+	if err := goose.SetDialect("postgres"); err != nil {
+		return fmt.Errorf("set goose dialect: %w", err)
+	}
+	wd, _ := os.Getwd()
+	fmt.Println("Working directory:", wd)
+
+	if err := goose.Up(db, "../../internal/platform/migration"); err != nil {
+		return fmt.Errorf("run migrations: %w", err)
+	}
+
+	return nil
 }
 
 func initTripHandler(db *pgxpool.Pool) http.Handler {
@@ -85,9 +111,8 @@ func initPlanVersionHandler(db *pgxpool.Pool) http.Handler {
 func initPlanStopHandler(db *pgxpool.Pool) http.Handler {
 	planRepo := planrepository.NewPlanStopRepository(db)
 	createPlanStopSvc := planservice.NewCreatePlanStopService(planRepo)
-	getPlanStopSvc := planservice.NewGetStopByIDService(planRepo)
 	listPlanStopSvc := planservice.NewListPlanStopService(planRepo)
-	return planstoprest.NewHandlers(createPlanStopSvc, getPlanStopSvc, listPlanStopSvc)
+	return planstoprest.NewHandlers(createPlanStopSvc, listPlanStopSvc)
 }
 
 func healthHandler(db *pgxpool.Pool) http.HandlerFunc {

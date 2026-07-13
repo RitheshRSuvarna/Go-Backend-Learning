@@ -28,8 +28,8 @@ func NewTrip(destination, startDate, endDate string, travelCount int) (*Trip, er
 		return nil, common.NewValidationError("end_date is required", nil)
 	}
 
-	if travelCount > 0 {
-		return nil, common.NewValidationError("travelers_count must be greater then zero", nil)
+	if travelCount <= 0 {
+		return nil, common.NewValidationError("traveler_count must be greater then zero", nil)
 	}
 
 	if _, err := time.Parse("2006-01-02", startDate); err != nil {

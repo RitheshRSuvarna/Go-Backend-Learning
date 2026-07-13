@@ -11,20 +11,19 @@ import (
 
 type Handlers struct {
 	createPlanStop *services.CreatePlanStopService
-	getPlanStop    *services.GetStopByIDService
-	listPlanStop   *services.ListPlanStopService
+
+	listPlanStop *services.ListPlanStopService
 }
 
-func NewHandlers(createps *services.CreatePlanStopService, getps *services.GetStopByIDService, listps *services.ListPlanStopService) *Handlers {
+func NewHandlers(createps *services.CreatePlanStopService, listps *services.ListPlanStopService) *Handlers {
 	return &Handlers{
 		createPlanStop: createps,
-		getPlanStop:    getps,
 		listPlanStop:   listps,
 	}
 }
 
 func (h *Handlers) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/plan-stop" {
+	if r.URL.Path != "/day-session" {
 		writeError(w, r, http.StatusNotFound, "not_found", "not found")
 		return
 	}
@@ -33,9 +32,7 @@ func (h *Handlers) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		h.create(w, r)
 	case http.MethodGet:
-		if r.PathValue("id") != "" {
-			h.getbyid(w, r)
-		} else if r.PathValue("planverisonid") != "" {
+		if r.PathValue("") != "" {
 			h.listPlanstop(w, r)
 		} else {
 			writeError(w, r, http.StatusBadRequest, "bad_request", "Missing identifier")
@@ -105,29 +102,6 @@ func (h *Handlers) create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	_ = json.NewEncoder(w).Encode(planstop)
-}
-
-func (h *Handlers) getbyid(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
-
-	planstopID, err := common.NewPlanStopID(id)
-	if err != nil {
-		writeDomainError(w, r, err)
-		return
-	}
-
-	planstop, err := h.getPlanStop.GetByID(
-		r.Context(),
-		planstopID,
-	)
-	if err != nil {
-		writeDomainError(w, r, err)
-		return
-	}
-
-	if err := json.NewEncoder(w).Encode(planstop); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
 }
 
 func (h *Handlers) listPlanstop(w http.ResponseWriter, r *http.Request) {

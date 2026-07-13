@@ -26,23 +26,6 @@ RETURNING
     busy_risk_label,
     created_at;
 
--- name: GetPlanStopByID :one
-SELECT
-    id,
-    plan_version_id,
-    position,
-    title,
-    category_label,
-    image_url,
-    planned_arrival,
-    planned_departure,
-    travel_minutes,
-    stay_minutes,
-    busy_risk_label,
-    created_at
-FROM plan_stops
-WHERE id = $1;
-
 -- name: ListPlanStopsByPlanVersionID :many
 SELECT
     id,

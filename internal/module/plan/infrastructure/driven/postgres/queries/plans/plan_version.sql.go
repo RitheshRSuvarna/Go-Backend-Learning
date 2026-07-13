@@ -36,14 +36,16 @@ func (q *Queries) CreatePlanVersion(ctx context.Context, arg CreatePlanVersionPa
 	return i, err
 }
 
-const getPlanVersionByID = `-- name: GetPlanVersionByID :one
+const getActivePlan = `-- name: GetActivePlan :one
 SELECT id, day_session_id, version, notes, created_at
 FROM plan_versions
-WHERE id = $1
+WHERE day_session_id = $1
+ORDER BY version DESC
+LIMIT 1
 `
 
-func (q *Queries) GetPlanVersionByID(ctx context.Context, id pgtype.UUID) (PlanVersion, error) {
-	row := q.db.QueryRow(ctx, getPlanVersionByID, id)
+func (q *Queries) GetActivePlan(ctx context.Context, daySessionID pgtype.UUID) (PlanVersion, error) {
+	row := q.db.QueryRow(ctx, getActivePlan, daySessionID)
 	var i PlanVersion
 	err := row.Scan(
 		&i.ID,
