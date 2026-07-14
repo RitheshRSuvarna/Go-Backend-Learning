@@ -10,7 +10,7 @@ WHERE trip_id = $1
 AND date = $2
 LIMIT 1;
 
--- name: GetByID :one
+-- name: GetByID :many
 SELECT id, trip_id, date, start_time, start_label, created_at
 FROM day_sessions 
-WHERE id= $1;
+WHERE trip_id= $1;

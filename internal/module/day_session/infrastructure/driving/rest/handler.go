@@ -24,23 +24,39 @@ func NewHandler(createds *services.CreateDaySessionService, listds *services.Lis
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/day-sessions" {
-		writeError(w, r, http.StatusNotFound, "not_found", "not found")
-		return
-	}
 
 	switch r.Method {
-	case http.MethodPost:
-		h.create(w, r)
-	case http.MethodGet:
-		switch {
-		case r.URL.Query().Get("trip_id") != "":
-			h.list(w, r)
 
-		case r.URL.Query().Get("day-session_id") != "" &&
-			r.URL.Query().Get("date") != "":
-			h.getByTripIDAndDate(w, r)
+	case http.MethodPost:
+		if r.URL.Path != "/day-sessions" {
+			writeError(w, r, http.StatusNotFound, "not_found", "not found")
+			return
 		}
+		h.create(w, r)
+
+	case http.MethodGet:
+
+		// GET /day-sessions/{id}
+		if id := r.PathValue("trip_id"); id != "" {
+			h.list(w, r)
+			return
+		}
+
+		// GET /day-sessions?trip_id=...&date=...
+		if r.URL.Query().Get("trip_id") != "" &&
+			r.URL.Query().Get("date") != "" {
+			h.getByTripIDAndDate(w, r)
+			return
+		}
+
+		// GET /day-sessions
+		if r.URL.Path == "/day-sessions" {
+			h.list(w, r)
+			return
+		}
+
+		writeError(w, r, http.StatusNotFound, "not_found", "not found")
+
 	default:
 		writeError(w, r, http.StatusMethodNotAllowed, "bad_request", "method not allowed")
 	}
@@ -114,9 +130,9 @@ func (h *Handler) getByTripIDAndDate(
 }
 
 func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
+	id := r.PathValue("trip_id")
 
-	daysessionID, err := common.NewDaySessionID(id)
+	tripID, err := common.NewTripID(id)
 	if err != nil {
 		writeDomainError(w, r, err)
 		return
@@ -124,9 +140,10 @@ func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
 
 	daySession, err := h.listDaysessionID.GetByID(
 		r.Context(),
-		daysessionID,
+		tripID,
 	)
 	if err != nil {
+		fmt.Println("List Handler Error:", err)
 		writeDomainError(w, r, err)
 		return
 	}

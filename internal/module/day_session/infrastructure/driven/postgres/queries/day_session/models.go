@@ -19,6 +19,29 @@ type DaySession struct {
 	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 }
 
+type PlanStop struct {
+	ID               pgtype.UUID        `json:"id"`
+	PlanVersionID    pgtype.UUID        `json:"plan_version_id"`
+	Position         int32              `json:"position"`
+	Title            string             `json:"title"`
+	CategoryLabel    string             `json:"category_label"`
+	ImageUrl         pgtype.Text        `json:"image_url"`
+	PlannedArrival   pgtype.Timestamptz `json:"planned_arrival"`
+	PlannedDeparture pgtype.Timestamptz `json:"planned_departure"`
+	TravelMinutes    int32              `json:"travel_minutes"`
+	StayMinutes      int32              `json:"stay_minutes"`
+	BusyRiskLabel    string             `json:"busy_risk_label"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+}
+
+type PlanVersion struct {
+	ID           pgtype.UUID        `json:"id"`
+	DaySessionID pgtype.UUID        `json:"day_session_id"`
+	Version      int32              `json:"version"`
+	Notes        pgtype.Text        `json:"notes"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+}
+
 type Trip struct {
 	ID             pgtype.UUID        `json:"id"`
 	Destination    string             `json:"destination"`

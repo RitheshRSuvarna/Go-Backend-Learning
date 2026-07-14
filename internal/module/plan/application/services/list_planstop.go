@@ -5,6 +5,7 @@ import (
 	"context"
 	"plan/application/dto"
 	"plan/domain/repository"
+	"plan/busy"
 )
 
 type ListPlanStopService struct {
@@ -22,8 +23,16 @@ func (s *ListPlanStopService) ListPlanStop(ctx context.Context, id common.PlanVe
 	}
 
 	out := make([]dto.PlanStopDTO, 0, len(planstop))
-	for _, t := range planstop {
-		out = append(out, dto.ToPlanStopDTO(t))
-	}
-	return nil, err
+	for _, stop := range planstop {
+        dto := dto.ToPlanStopDTO(stop)
+
+        dto.BusyRiskLabel = busy.Label(
+            stop.CategoryLabel(),
+            stop.PlannedArrival().Format("15:04"),
+        )
+
+        out = append(out, dto)
+    }
+
+	return out, nil
 }

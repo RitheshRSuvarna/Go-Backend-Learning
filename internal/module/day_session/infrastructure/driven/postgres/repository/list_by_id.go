@@ -9,32 +9,39 @@ import (
 
 func (r *PostgresDaySessionRepository) GetByID(
 	ctx context.Context,
-	id common.DaySessionID,
-) (*entity.DaySession, error) {
+	id common.TripID,
+) ([]*entity.DaySession, error) {
 	pgID, err := uuidStringToPgUUID(id.String())
 	if err != nil {
 		return nil, err
 	}
 
-	row, err := r.getQueries(ctx).GetByID(
+	rows, err := r.getQueries(ctx).GetByID(
 		ctx,
 		pgID,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get day session: %w", err)
-	}
-
-	daySession, err := rowToDomainDaySession(
-		row.ID,
-		row.TripID,
-		row.Date,
-		row.StartTime,
-		row.StartLabel,
-		row.CreatedAt,
-	)
-	if err != nil {
+		fmt.Println("Repository List Error:", err)
 		return nil, err
 	}
 
-	return daySession, nil
+	daySessions := make([]*entity.DaySession, 0, len(rows))
+
+	for _, row := range rows {
+		daySession, err := rowToDomainDaySession(
+			row.ID,
+			row.TripID,
+			row.Date,
+			row.StartTime,
+			row.StartLabel,
+			row.CreatedAt,
+		)
+		if err != nil {
+			fmt.Println("rowToDomainDaySession Error:", err)
+			return nil, err
+		}
+
+		daySessions = append(daySessions, daySession)
+	}
+	return daySessions, nil
 }

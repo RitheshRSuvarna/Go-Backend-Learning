@@ -52,10 +52,10 @@ func (q *Queries) CreateDaySession(ctx context.Context, arg CreateDaySessionPara
 	return i, err
 }
 
-const getByID = `-- name: GetByID :one
+const getByID = `-- name: GetByID :many
 SELECT id, trip_id, date, start_time, start_label, created_at
 FROM day_sessions 
-WHERE id= $1
+WHERE trip_id= $1
 `
 
 type GetByIDRow struct {
@@ -67,18 +67,31 @@ type GetByIDRow struct {
 	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 }
 
-func (q *Queries) GetByID(ctx context.Context, id pgtype.UUID) (GetByIDRow, error) {
-	row := q.db.QueryRow(ctx, getByID, id)
-	var i GetByIDRow
-	err := row.Scan(
-		&i.ID,
-		&i.TripID,
-		&i.Date,
-		&i.StartTime,
-		&i.StartLabel,
-		&i.CreatedAt,
-	)
-	return i, err
+func (q *Queries) GetByID(ctx context.Context, tripID pgtype.UUID) ([]GetByIDRow, error) {
+	rows, err := q.db.Query(ctx, getByID, tripID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetByIDRow
+	for rows.Next() {
+		var i GetByIDRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.TripID,
+			&i.Date,
+			&i.StartTime,
+			&i.StartLabel,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getDaySessionByIDAndDate = `-- name: GetDaySessionByIDAndDate :one

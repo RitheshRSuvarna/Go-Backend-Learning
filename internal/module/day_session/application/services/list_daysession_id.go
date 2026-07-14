@@ -15,12 +15,18 @@ func NewDaySessionListService(dayrepo repository.DaySessionRepository) *ListDayS
 	return &ListDaySessionServiceID{dayrepo: dayrepo}
 }
 
-func (d *ListDaySessionServiceID) GetByID(ctx context.Context, id common.DaySessionID) (dto.DaySessionDTO, error) {
+func (d *ListDaySessionServiceID) GetByID(ctx context.Context, id common.TripID) ([]dto.DaySessionDTO, error) {
 	daysession, err := d.dayrepo.GetByID(
 		ctx, id,
 	)
 	if err != nil {
-		return dto.DaySessionDTO{}, err
+		return nil, err
 	}
-	return dto.ToDaySessionDTO(daysession), nil
+
+	out := make([]dto.DaySessionDTO, 0, len(daysession))
+
+	for _, ds := range daysession {
+		out = append(out, dto.ToDaySessionDTO(ds))
+	}
+	return out, nil
 }
