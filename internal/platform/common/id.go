@@ -89,6 +89,20 @@ func GeneratePlanStopID() PlanStopID {
 	return PlanStopID(GenerateID())
 }
 
+type AssistantSuggestionsID ID
+
+func NewAssistantSuggestionsID(value string) (AssistantSuggestionsID, error) {
+	id, err := NewID(value)
+	if err != nil {
+		return AssistantSuggestionsID{}, err
+	}
+	return AssistantSuggestionsID(id), nil
+}
+
+func GenerateAssistantSuggestionsID() AssistantSuggestionsID {
+	return AssistantSuggestionsID(GenerateID())
+}
+
 func (id TripID) String() string { return ID(id).String() }
 func (id TripID) Value() string  { return ID(id).Value() }
 func (id TripID) IsZero() bool   { return ID(id).IsZero() }
@@ -104,3 +118,7 @@ func (id PlanVersionID) IsZero() bool   { return ID(id).IsZero() }
 func (id PlanStopID) String() string { return ID(id).String() }
 func (id PlanStopID) Value() string  { return ID(id).Value() }
 func (id PlanStopID) IsZero() bool   { return ID(id).IsZero() }
+
+func (id AssistantSuggestionsID) String() string {return ID(id).String()}
+func (id AssistantSuggestionsID) Value() string {return ID(id).Value()}
+func (id AssistantSuggestionsID) IsZero() bool {return ID(id).IsZero()}

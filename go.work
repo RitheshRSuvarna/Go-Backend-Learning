@@ -3,9 +3,10 @@ go 1.25.0
 use (
 	./cmd/api
 	./internal/module/trips
-	./internal/module/day_session
-	./internal/module/plan
+	./internal/module/day_sessions
+	./internal/module/plans
 	./internal/platform/common
 	./internal/platform/postgres
+	./internal/module/assistant_suggestions
 	
 )
