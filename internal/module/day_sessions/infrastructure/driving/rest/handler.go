@@ -49,11 +49,11 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// GET /day-sessions
-		if r.URL.Path == "/day-sessions" {
-			h.list(w, r)
-			return
-		}
+		// // GET /day-sessions
+		// if r.URL.Path == "/day-sessions" {
+		// 	h.list(w, r)
+		// 	return
+		// }
 
 		writeError(w, r, http.StatusNotFound, "not_found", "not found")
 

@@ -15,10 +15,16 @@ func NewGetAssistantSuggestionService( sugrepo repository.AssistantSuggestionRep
 	return &GetAssistantSuggestionService{sugrepo: sugrepo}
 }
 
-func (s *GetAssistantSuggestionService) GetAssistantSuggestions(ctx context.Context, id common.DaySessionID) (dto.AssistantSuggestionsDTO, error) {
-	sugg, err := s.sugrepo.Get(ctx, id)
+func (s *GetAssistantSuggestionService) GetAssistantSuggestions(ctx context.Context, id common.DaySessionID) ([]dto.AssistantSuggestionsDTO, error) {
+	assis, err := s.sugrepo.Get(ctx, id)
 	if err != nil {
-		return dto.AssistantSuggestionsDTO{}, err
+		return nil, err
 	}
-	return dto.ToAssistantSuggestionsDTO(sugg), nil
+
+	out := make([]dto.AssistantSuggestionsDTO, 0, len(assis))
+
+	for _, as := range assis {
+		out = append(out, dto.ToAssistantSuggestionsDTO(as))
+	}
+	return out, nil
 }

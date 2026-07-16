@@ -16,7 +16,7 @@ func NewAssistantSuggestionService(sugrepo repository.AssistantSuggestionReposit
 	return &CreateAssistantSuggestionsService{sugrepo: sugrepo}
 }
 
-func (c *CreateAssistantSuggestionsService) CreateAssSug(ctx context.Context, cmd command.CreateAssistantSuggestionCommand) (dto.AssistantSuggestionsDTO, error) {
+func (c *CreateAssistantSuggestionsService) CreateAssistantSuggestions(ctx context.Context, cmd command.CreateAssistantSuggestionCommand) (dto.AssistantSuggestionsDTO, error) {
 	AssSug, err := entity.NewAssistantSuggestions(cmd.DaySessionID, cmd.Message, cmd.Status)
 	if err != nil {
 		return dto.AssistantSuggestionsDTO{}, nil

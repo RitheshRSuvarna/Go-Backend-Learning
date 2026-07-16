@@ -7,20 +7,20 @@ import (
 )
 
 type apiError struct {
-	Error struct {
-		Code      string		
-		Message   string
+	Error struct{
+		Code string
+		Message string
 		RequestID string
 	}
 }
 
 func writeError(w http.ResponseWriter, r *http.Request, status int, code, message string) {
-
+	
 	var body apiError
 	body.Error.Code = code
 	body.Error.Message = message
 	if reqID := r.Header.Get("X-Request-ID"); reqID != "" {
-		body.Error.RequestID = reqID
+		body.Error.RequestID= reqID
 	}
 
 	w.Header().Set("Content-Type", "application/json")

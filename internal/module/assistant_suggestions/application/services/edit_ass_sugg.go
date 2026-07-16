@@ -15,8 +15,8 @@ func NewEditAssistantSuggestionService(sugrepo repository.AssistantSuggestionRep
 	return &EditAssistantSuggestionService{sugrepo: sugrepo}
 }
 
-func (e *EditAssistantSuggestionService) EditAssistantSugg(ctx context.Context, id common.AssistantSuggestionsID) (dto.AssistantSuggestionsDTO, error) {
-	Sugg, err := e.sugrepo.Edit(ctx, id)
+func (e *EditAssistantSuggestionService) EditAssistantSuggestions(ctx context.Context, id common.AssistantSuggestionsID, message, status string) (dto.AssistantSuggestionsDTO, error) {
+	Sugg, err := e.sugrepo.Edit(ctx, id, message, status)
 	if err != nil {
 		return dto.AssistantSuggestionsDTO{}, err
 	}

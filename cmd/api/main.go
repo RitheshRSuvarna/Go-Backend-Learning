@@ -9,6 +9,9 @@ import (
 	"os"
 	"time"
 
+	assistantsuggservice "assistant_suggestions/application/services"
+	assistantsuggrepository "assistant_suggestions/infrastructure/driven/postgres/repository"
+	assistantsuggrest "assistant_suggestions/infrastructure/driving/rest"
 	daysessionservice "day_session/application/services"
 	daysessionrepository "day_session/infrastructure/driven/postgres/repository"
 	daysessionrest "day_session/infrastructure/driving/rest"
@@ -52,7 +55,9 @@ func main() {
 	mux.Handle("/api/day-sessions/{trip_id}", http.StripPrefix("/api", initDaySessionHandler(db)))
 	mux.Handle("/api/day-sessions/{trip_id}/{date}", http.StripPrefix("/api", initDaySessionHandler(db)))
 	mux.Handle("/api/day-sessions/{id}/plan-versions/", http.StripPrefix("/api", initPlanVersionHandler(db)))
+	mux.Handle("/api/day-sessions/{id}/assistant-suggestions", http.StripPrefix("/api", initAssistantSuggestionHandler(db)))
 	mux.Handle("/api/day-sessions/{id}/active-plan", http.StripPrefix("/api", initPlanStopHandler(db)))
+
 	mux.HandleFunc("/health", healthHandler(db))
 
 	log.Printf("Trips API: http://localhost:%s/api", port)
@@ -115,6 +120,15 @@ func initPlanStopHandler(db *pgxpool.Pool) http.Handler {
 	createPlanStopSvc := planservice.NewCreatePlanStopService(planRepo)
 	listPlanStopSvc := planservice.NewListPlanStopService(planRepo)
 	return planstoprest.NewHandlers(createPlanStopSvc, listPlanStopSvc)
+}
+
+func initAssistantSuggestionHandler(db *pgxpool.Pool) http.Handler {
+	assistantsuggestionrepo := assistantsuggrepository.NewAssistantSuggestionRepository(db)
+	createassistantsuggsvc := assistantsuggservice.NewAssistantSuggestionService(assistantsuggestionrepo)
+	getassistantsuggsvc := assistantsuggservice.NewGetAssistantSuggestionService(assistantsuggestionrepo)
+	editassistantsuggsvc := assistantsuggservice.NewEditAssistantSuggestionService(assistantsuggestionrepo)
+	return assistantsuggrest.NewHandler(createassistantsuggsvc, getassistantsuggsvc, editassistantsuggsvc)
+
 }
 
 func healthHandler(db *pgxpool.Pool) http.HandlerFunc {
