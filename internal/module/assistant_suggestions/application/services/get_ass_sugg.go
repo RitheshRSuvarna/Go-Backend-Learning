@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"context"
 	"common"
 	"assistant_suggestions/domain/repository"
@@ -18,6 +19,7 @@ func NewGetAssistantSuggestionService( sugrepo repository.AssistantSuggestionRep
 func (s *GetAssistantSuggestionService) GetAssistantSuggestions(ctx context.Context, id common.DaySessionID) ([]dto.AssistantSuggestionsDTO, error) {
 	assis, err := s.sugrepo.Get(ctx, id)
 	if err != nil {
+		fmt.Printf("Service Error: %v\n", err)
 		return nil, err
 	}
 

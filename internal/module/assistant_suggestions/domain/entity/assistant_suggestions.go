@@ -13,6 +13,10 @@ type AssistantSuggestions struct {
 }
 
 func NewAssistantSuggestions(DaysessionID, message, status string) (*AssistantSuggestions, error) {
+	// id, err := common.NewAssistantSuggestionsID()
+	// if err != nil {
+	// 	return nil, common.NewValidationError("Invalid assistant suggestion id", err)
+	// }
 	daysessionID, err := common.NewDaySessionID(DaysessionID)
 	if err != nil {
 		return nil, common.NewValidationError("Invalid daysession id", err)
@@ -33,6 +37,7 @@ func NewAssistantSuggestions(DaysessionID, message, status string) (*AssistantSu
 	now := common.Now()
 
 	return &AssistantSuggestions{
+		// id:           id,
 		daysessionID: daysessionID,
 		message:      message,
 		status:       status,

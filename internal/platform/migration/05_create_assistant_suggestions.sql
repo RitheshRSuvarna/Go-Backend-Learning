@@ -1,7 +1,7 @@
 -- +goose Up
 
 CREATE TABLE assistant_suggestions (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     day_session_id UUID NOT NULL,
     message TEXT NOT NULL,
     status TEXT NOT NULL,

@@ -103,6 +103,20 @@ func GenerateAssistantSuggestionsID() AssistantSuggestionsID {
 	return AssistantSuggestionsID(GenerateID())
 }
 
+type EventsID ID
+
+func NewEventsID(value string) (EventsID, error) {
+	id, err := NewID(value)
+	if err != nil {
+		return EventsID{}, err
+	}
+	return EventsID(id), err
+}
+
+func GenerateEventID() EventsID {
+	return EventsID(GenerateID())
+}
+
 func (id TripID) String() string { return ID(id).String() }
 func (id TripID) Value() string  { return ID(id).Value() }
 func (id TripID) IsZero() bool   { return ID(id).IsZero() }
@@ -119,6 +133,10 @@ func (id PlanStopID) String() string { return ID(id).String() }
 func (id PlanStopID) Value() string  { return ID(id).Value() }
 func (id PlanStopID) IsZero() bool   { return ID(id).IsZero() }
 
-func (id AssistantSuggestionsID) String() string {return ID(id).String()}
-func (id AssistantSuggestionsID) Value() string {return ID(id).Value()}
-func (id AssistantSuggestionsID) IsZero() bool {return ID(id).IsZero()}
+func (id AssistantSuggestionsID) String() string { return ID(id).String() }
+func (id AssistantSuggestionsID) Value() string  { return ID(id).Value() }
+func (id AssistantSuggestionsID) IsZero() bool   { return ID(id).IsZero() }
+
+func (id EventsID) String() string { return ID(id).String() }
+func (id EventsID) Value() string  { return ID(id).Value() }
+func (id EventsID) IsZero() bool   { return ID(id).IsZero() }

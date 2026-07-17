@@ -24,52 +24,69 @@ func NewHandler(createsug *services.CreateAssistantSuggestionsService, getsugg *
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// fmt.Println("===== AssistantSuggestionHandler =====")
+	// fmt.Println("Method:", r.Method)
+	// fmt.Println("Path:", r.URL.Path)
+	// fmt.Println("ID:", r.PathValue("id"))
+
 	switch r.Method {
 
 	case http.MethodPost:
-		if r.URL.Path != "/assistant_suggestion" {
+		if r.PathValue("id") == "" {
+			fmt.Println("404 returned from GET validation")
 			writeError(w, r, http.StatusNotFound, "not_found", "not found")
 			return
 		}
 		h.create(w, r)
 
 	case http.MethodGet:
-
-		// GET /day-sessions/{id}
-		if id := r.PathValue("day_session_id"); id != "" {
-			h.get(w, r)
+		if r.PathValue("id") == "" {
+			writeError(w, r, http.StatusNotFound, "not_found", "not found")
 			return
 		}
+		h.get(w, r)
 
 	case http.MethodPut:
-		if id := r.PathValue("assistant_suggestion_id"); id != "" {
-			h.edit(w, r)
+		if r.PathValue("id") == "" {
+			writeError(w, r, http.StatusNotFound, "not_found", "not found")
 			return
 		}
+		h.edit(w, r)
+
+	default:
+		writeError(
+			w,
+			r,
+			http.StatusMethodNotAllowed,
+			"method_not_allowed",
+			"method not allowed",
+		)
 	}
 }
 
 type CreateAssistantSuggestionRequest struct {
-	DaySessionID string `json: day_session_id`
-	Message      string `json: message`
-	Status       string `json: status`
+	DaySessionID string `json:"day_session_id"`
+	Message      string `json:"message"`
+	Status       string `json:"status"`
 }
 
 func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 	var req CreateAssistantSuggestionRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		fmt.Printf("Decode error", err)
 		writeError(w, r, http.StatusBadRequest, "Bad_request", "invalid json")
 		return
 	}
-	fmt.Printf("%v\n", req)
+	// fmt.Printf("%+v\n", req)
+
+	daySessionID := r.PathValue("id")
 
 	assistantsuggestion, err := h.createsug.CreateAssistantSuggestions(r.Context(), command.CreateAssistantSuggestionCommand{
-		DaySessionID: req.DaySessionID,
+		DaySessionID: daySessionID,
 		Message:      req.Message,
 		Status:       req.Status,
 	})
+	// fmt.Printf("DTO returned: %+v\n", assistantsuggestion)
 	if err != nil {
 		writeDomainError(w, r, err)
 		return
@@ -81,7 +98,7 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) get(w http.ResponseWriter, r *http.Request) {
-	daysessionid := r.URL.Query().Get("day_session_id")
+	daysessionid := r.PathValue("id")
 
 	dayid, err := common.NewDaySessionID(daysessionid)
 	if err != nil {
@@ -91,6 +108,7 @@ func (h *Handler) get(w http.ResponseWriter, r *http.Request) {
 
 	assisSugg, err := h.getsugg.GetAssistantSuggestions(r.Context(), dayid)
 	if err != nil {
+		fmt.Printf("GET Handler Error: %v\n", err)
 		writeDomainError(w, r, err)
 		return
 	}
@@ -108,7 +126,7 @@ type EditAssistantSuggestionRequest struct {
 }
 
 func (h *Handler) edit(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("assistant_suggestion_id")
+	id := r.PathValue("id")
 
 	sugid, err := common.NewAssistantSuggestionsID(id)
 	if err != nil {

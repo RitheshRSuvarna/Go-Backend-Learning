@@ -9,19 +9,21 @@ import (
 )
 
 func (r *PostgresAssistantSuggestionRepository) Create(ctx context.Context, assistantsugg *entity.AssistantSuggestions) error {
+	// fmt.Println(">>> Repository Create() entered")
 	daysessionid, err := uuidStringToPgUUID(assistantsugg.DaysessionID().String())
 	if err != nil {
-		return  common.NewValidationError("Invlaid id", err)
+		return common.NewValidationError("Invlaid id", err)
 	}
 
-	row, err :=r.getQueries(ctx).CreateAssistantSuggestions(ctx, asqueries.CreateAssistantSuggestionsParams{
+	row, err := r.getQueries(ctx).CreateAssistantSuggestions(ctx, asqueries.CreateAssistantSuggestionsParams{
 		DaySessionID: daysessionid,
-		Message: assistantsugg.Message(),
-		Status: assistantsugg.Status(),
+		Message:      assistantsugg.Message(),
+		Status:       assistantsugg.Status(),
 	})
 	if err != nil {
 		return fmt.Errorf("Falied to create assistant suggestions:%v", err)
 	}
+	// fmt.Printf("SQL Row: %+v\n", row)
 
 	created, err := rowToDomainAssistantSuggestion(
 		row.ID,
@@ -33,6 +35,11 @@ func (r *PostgresAssistantSuggestionRepository) Create(ctx context.Context, assi
 	if err != nil {
 		return err
 	}
+	// fmt.Printf("Created Entity: %+v\n", created)
+
 	assistantsugg.SetID(created.ID())
+
+	// fmt.Printf("After SetID: %+v\n", assistantsugg)
 	return nil
+
 }

@@ -55,8 +55,9 @@ func main() {
 	mux.Handle("/api/day-sessions/{trip_id}", http.StripPrefix("/api", initDaySessionHandler(db)))
 	mux.Handle("/api/day-sessions/{trip_id}/{date}", http.StripPrefix("/api", initDaySessionHandler(db)))
 	mux.Handle("/api/day-sessions/{id}/plan-versions/", http.StripPrefix("/api", initPlanVersionHandler(db)))
-	mux.Handle("/api/day-sessions/{id}/assistant-suggestions", http.StripPrefix("/api", initAssistantSuggestionHandler(db)))
 	mux.Handle("/api/day-sessions/{id}/active-plan", http.StripPrefix("/api", initPlanStopHandler(db)))
+	mux.Handle("/api/day-sessions/{id}/suggestions", http.StripPrefix("/api", initAssistantSuggestionHandler(db)))
+	mux.Handle("/api/assistant-suggestions/{id}", http.StripPrefix("/api", initAssistantSuggestionHandler(db)))
 
 	mux.HandleFunc("/health", healthHandler(db))
 
