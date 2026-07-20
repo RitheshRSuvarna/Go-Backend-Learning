@@ -20,4 +20,20 @@ func NewEvents(DaysessionID, EventType string, payload json.RawMessage) (*Events
 		return nil, common.NewValidationError("Invalid daysession id", err)
 	}
 
+	if eventtype == "" {
+		return nil, common.NewValidationError("Event type cannot be empty", err)
+	}
+
+	if len(payload) == 0 {
+    return nil, common.NewValidationError("payload cannot be empty", nil)
+	}
+
+	if !json.Valid(payload) {
+    return nil, common.NewValidationError("payload must be valid JSON", nil)
+}
+
+
+
+
+
 }
