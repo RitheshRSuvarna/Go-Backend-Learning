@@ -2,9 +2,9 @@ go 1.25.0
 
 use (
 	./cmd/api
-	./internal/module/events
 	./internal/module/assistant_suggestions
 	./internal/module/day_sessions
+	./internal/module/events
 	./internal/module/plans
 	./internal/module/trips
 	./internal/platform/common

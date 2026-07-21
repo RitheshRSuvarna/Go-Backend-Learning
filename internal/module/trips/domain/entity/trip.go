@@ -46,7 +46,7 @@ func NewTrip(destination, startDate, endDate string, travelCount int) (*Trip, er
 		destination: destination,
 		startDate:   startDate,
 		endDate:     endDate,
-		travelCount: travelCount,
+		travelCount: travelCount,	
 		createdAt:   now,
 	}, nil
 

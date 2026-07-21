@@ -15,6 +15,9 @@ import (
 	daysessionservice "day_session/application/services"
 	daysessionrepository "day_session/infrastructure/driven/postgres/repository"
 	daysessionrest "day_session/infrastructure/driving/rest"
+	eventservice "events/application/services"
+	eventrepository "events/infrastructure/driven/postgres/repository"
+	eventrest "events/infrastructure/driving/rest"
 	planservice "plan/application/services"
 	planrepository "plan/infrastructure/driven/postgres/repository"
 	planstoprest "plan/infrastructure/driving/rest"
@@ -58,6 +61,7 @@ func main() {
 	mux.Handle("/api/day-sessions/{id}/active-plan", http.StripPrefix("/api", initPlanStopHandler(db)))
 	mux.Handle("/api/day-sessions/{id}/suggestions", http.StripPrefix("/api", initAssistantSuggestionHandler(db)))
 	mux.Handle("/api/assistant-suggestions/{id}", http.StripPrefix("/api", initAssistantSuggestionHandler(db)))
+	mux.Handle("/api/day-sessions/{id}/events", http.StripPrefix("/api", initEventsHandler(db)))
 
 	mux.HandleFunc("/health", healthHandler(db))
 
@@ -129,7 +133,13 @@ func initAssistantSuggestionHandler(db *pgxpool.Pool) http.Handler {
 	getassistantsuggsvc := assistantsuggservice.NewGetAssistantSuggestionService(assistantsuggestionrepo)
 	editassistantsuggsvc := assistantsuggservice.NewEditAssistantSuggestionService(assistantsuggestionrepo)
 	return assistantsuggrest.NewHandler(createassistantsuggsvc, getassistantsuggsvc, editassistantsuggsvc)
+}
 
+func initEventsHandler(db *pgxpool.Pool) http.Handler {
+	eventsrepo := eventrepository.NewEventsRepository(db)
+	createventsvc := eventservice.NewCreateEventsService(eventsrepo)
+	geteventsvc := eventservice.NewGetEventService(eventsrepo)
+	return eventrest.NewHandler(createventsvc, geteventsvc)
 }
 
 func healthHandler(db *pgxpool.Pool) http.HandlerFunc {
