@@ -3,9 +3,9 @@ package services
 import (
 	"common"
 	"context"
-	"plan/application/dto"
-	"plan/domain/repository"
-	"plan/busy"
+	"plans/application/dto"
+	"plans/domain/repository"
+	"plans/busy"
 )
 
 type ListPlanStopService struct {

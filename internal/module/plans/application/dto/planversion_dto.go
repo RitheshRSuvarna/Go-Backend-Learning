@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"plan/domain/entity"
+	"plans/domain/entity"
 	"time"
 )
 

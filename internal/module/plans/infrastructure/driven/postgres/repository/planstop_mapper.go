@@ -3,7 +3,7 @@ package repository
 import (
 	"common"
 	"fmt"
-	"plan/domain/entity"
+	"plans/domain/entity"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"

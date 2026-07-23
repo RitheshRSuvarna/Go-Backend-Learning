@@ -4,8 +4,8 @@ import (
 	"common"
 	"encoding/json"
 	"net/http"
-	"plan/application/command"
-	"plan/application/services"
+	"plans/application/command"
+	"plans/application/services"
 	"time"
 )
 

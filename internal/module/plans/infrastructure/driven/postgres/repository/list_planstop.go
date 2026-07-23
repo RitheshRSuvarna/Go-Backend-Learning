@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	// psqueries "plan/infrastructure/driven/postgres/queries/plans"
-	"plan/domain/entity"
+	"plans/domain/entity"
 )
 
 func (r *PostgresPlanStopRepository) ListStop(ctx context.Context, id common.PlanVersionID) ([]*entity.PlanStop, error) {

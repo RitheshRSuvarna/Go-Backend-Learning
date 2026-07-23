@@ -3,8 +3,8 @@ package services
 import (
 	"common"
 	"context"
-	"plan/application/dto"
-	"plan/domain/repository"
+	"plans/application/dto"
+	"plans/domain/repository"
 )
 
 type GetByIDPlanVersionService struct {

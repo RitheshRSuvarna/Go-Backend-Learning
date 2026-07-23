@@ -4,7 +4,7 @@ import (
 	"common"
 	"context"
 	"fmt"
-	"plan/domain/entity"
+	"plans/domain/entity"
 	// pvqueries "plan/infrastructure/driven/postgres/queries/plans"
 )
 

@@ -2,8 +2,8 @@ package repository
 
 import (
 	"context"
-	"plan/domain/repository"
-	pvqueries "plan/infrastructure/driven/postgres/queries/plans"
+	"plans/domain/repository"
+	pvqueries "plans/infrastructure/driven/postgres/queries/plans"
 	platformpostgres "postgres"
 
 	"github.com/jackc/pgx/v5/pgxpool"

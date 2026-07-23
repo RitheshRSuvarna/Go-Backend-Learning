@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	// psqueries "plan/infrastructure/driven/postgres/queries/plans"
-	"plan/domain/entity"
+	"plans/domain/entity"
 )
 
 func (r *PostgresPlanVersionRepository) ListPlanVersion(ctx context.Context, id common.DaySessionID) ([]*entity.PlanVersion, error) {

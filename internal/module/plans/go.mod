@@ -1,4 +1,4 @@
-module plan
+module plans
 
 go 1.25.0
 

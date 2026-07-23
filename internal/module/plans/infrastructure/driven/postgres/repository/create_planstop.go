@@ -4,8 +4,8 @@ import (
 	"common"
 	"context"
 	"fmt"
-	"plan/domain/entity"
-	psqueries "plan/infrastructure/driven/postgres/queries/plans"
+	"plans/domain/entity"
+	psqueries "plans/infrastructure/driven/postgres/queries/plans"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )

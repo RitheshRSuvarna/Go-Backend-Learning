@@ -3,10 +3,10 @@ package services
 import (
 	"common"
 	"context"
-	"plan/application/command"
-	"plan/application/dto"
-	"plan/domain/entity"
-	"plan/domain/repository"
+	"plans/application/command"
+	"plans/application/dto"
+	"plans/domain/entity"
+	"plans/domain/repository"
 )
 
 type CreatePlanVersionService struct {

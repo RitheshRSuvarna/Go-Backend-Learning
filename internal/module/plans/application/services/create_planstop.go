@@ -4,10 +4,10 @@ import (
 	// "time"
 	"common"
 	"context"
-	"plan/application/command"
-	"plan/application/dto"
-	"plan/domain/repository"
-	"plan/domain/entity"
+	"plans/application/command"
+	"plans/application/dto"
+	"plans/domain/repository"
+	"plans/domain/entity"
 )
 
 type CreatePlanStopService struct {

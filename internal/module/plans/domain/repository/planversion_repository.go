@@ -3,7 +3,7 @@ package repository
 import (
 	"common"
 	"context"
-	"plan/domain/entity"
+	"plans/domain/entity"
 )
 
 type PlanVersionRepository interface {
