@@ -106,8 +106,11 @@ func initTripHandler(db *pgxpool.Pool) http.Handler {
 
 func initDaySessionHandler(db *pgxpool.Pool) http.Handler {
 	daySessionRepo := daysessionrepository.NewDaySessionRepository(db)
+	planRepo := planrepository.NewPlanVersionRepository(db)
+	planStopRepo := planrepository.NewPlanStopRepository(db)
+	eventRepo := eventrepository.NewEventsRepository(db)
 	createDaySessionSvc := daysessionservice.NewDaySessionService(daySessionRepo)
-	listDaySessionSvc := daysessionservice.NewListDaySessionService(daySessionRepo)
+	listDaySessionSvc := daysessionservice.NewListDaySessionService(daySessionRepo, planRepo, planStopRepo, eventRepo)
 	getByTripIDAndDateDaySessionSvc := daysessionservice.NewDaySessionListService(daySessionRepo)
 	return daysessionrest.NewHandler(createDaySessionSvc, listDaySessionSvc, getByTripIDAndDateDaySessionSvc)
 }
