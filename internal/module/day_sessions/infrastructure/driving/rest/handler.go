@@ -28,11 +28,12 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 
 	case http.MethodPost:
-		if r.URL.Path != "/day-sessions" {
-			writeError(w, r, http.StatusNotFound, "not_found", "not found")
-			return
-		}
-		h.create(w, r)
+    if tripID := r.PathValue("trip_id"); tripID != "" {
+        h.create(w, r)
+        return
+    }
+
+    writeError(w, r, http.StatusNotFound, "not_found", "not found")
 
 	case http.MethodGet:
 
@@ -70,6 +71,7 @@ type CreateDaySessionRequest struct {
 }
 
 func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
+	tripid := r.PathValue("trip_id")
 	var req CreateDaySessionRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -80,7 +82,7 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("%+v\n", req)
 
 	daysession, err := h.createDaysession.CreateDaySession(r.Context(), command.CreateDaySessionCommand{
-		TripID:     req.TripID,
+		TripID:     tripid,
 		Date:       req.Date,
 		StartTime:  req.StartTime,
 		StartLabel: req.StartLabel,

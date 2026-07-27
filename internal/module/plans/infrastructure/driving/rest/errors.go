@@ -29,10 +29,12 @@ func writeError(w http.ResponseWriter, r *http.Request, status int, code, messag
 func writeDomainError(w http.ResponseWriter, r *http.Request, err error) {
 	if common.IsValidationError(err) {
 		writeError(w, r, http.StatusBadRequest, "Bad_request", err.Error())
+		return
 	}
 
 	if common.IsNotFoundError(err) {
 		writeError(w, r, http.StatusNotFound, "Not_found", err.Error())
+		return
 	}
 	writeError(w, r, http.StatusInternalServerError, "Internal_error", "internal_server_error")
 }

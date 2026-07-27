@@ -3,6 +3,7 @@ package rest
 import (
 	"common"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"plans/application/command"
 	"plans/application/services"
@@ -16,20 +17,20 @@ type Handler struct {
 }
 
 type ActivePlanHandler struct {
-	getPlanversion    *services.GetByIDPlanVersionService
+	getPlanversion *services.GetByIDPlanVersionService
 }
 
 func NewHandler(createpv *services.CreatePlanVersionService, getpln *services.GetByIDPlanVersionService, listpv *services.ListPlanVerionservice) *Handler {
 	return &Handler{
 		createPlanVersion: createpv,
-		getPlanversion: getpln,
+		getPlanversion:    getpln,
 		listplanversion:   listpv,
 	}
 }
 
 // func NewActivePlanHandler(getpv *services.GetByIDPlanVersionService) *ActivePlanHandler {
 // 	return &ActivePlanHandler{
-		
+
 // 	}
 // }
 
@@ -88,12 +89,12 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type CreatePlanVersionRequest struct {
-	DaySessionID string `json:"daysessionid"`
 	Version      int    `json:"version"`
 	Note         string `json:"note"`
 }
 
 func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("PlanVersion create handler called")
 	var req CreatePlanVersionRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -101,18 +102,26 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	daysessionID, err := common.NewDaySessionID(req.DaySessionID)
+	daySessionID := r.PathValue("id")
+
+	daysessionID, err := common.NewDaySessionID(daySessionID)
 	if err != nil {
 		writeDomainError(w, r, err)
 		return
 	}
 
-	planversion, err := h.createPlanVersion.CreatePlanVersion(r.Context(), daysessionID, command.CreatePlanVersionCommand{
-		DaysessionID: req.DaySessionID,
-		Version:      req.Version,
-		Note:         req.Note,
-	})
+	planversion, err := h.createPlanVersion.CreatePlanVersion(
+		r.Context(),
+		daysessionID,
+		command.CreatePlanVersionCommand{
+			DaysessionID: daySessionID,
+			Version:      req.Version,
+			Note:         req.Note,
+		},
+	)
 	if err != nil {
+		fmt.Printf("ERROR TYPE: %T\n", err)
+		fmt.Printf("ERROR: %+v\n", err)
 		writeDomainError(w, r, err)
 		return
 	}
@@ -120,7 +129,6 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	_ = json.NewEncoder(w).Encode(planversion)
 }
-
 
 func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
@@ -132,7 +140,7 @@ func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
 	}
 
 	daysession, err := h.listplanversion.ListVersion(
-		r.Context(), 
+		r.Context(),
 		daysessionid,
 	)
 	if err != nil {
