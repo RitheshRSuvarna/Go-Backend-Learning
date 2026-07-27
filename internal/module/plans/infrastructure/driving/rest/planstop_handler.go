@@ -3,6 +3,7 @@ package rest
 import (
 	"common"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"plans/application/command"
 	"plans/application/services"
@@ -23,27 +24,20 @@ func NewHandlers(createps *services.CreatePlanStopService, listps *services.List
 }
 
 func (h *Handlers) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/day-session" {
-		writeError(w, r, http.StatusNotFound, "not_found", "not found")
-		return
-	}
-
+	fmt.Println("=== PlanStop ServeHTTP ===", r.Method, r.URL.Path)
 	switch r.Method {
 	case http.MethodPost:
 		h.create(w, r)
+
 	case http.MethodGet:
-		if r.PathValue("") != "" {
-			h.listPlanstop(w, r)
-		} else {
-			writeError(w, r, http.StatusBadRequest, "bad_request", "Missing identifier")
-		}
+		h.listPlanstop(w, r)
+
 	default:
 		writeError(w, r, http.StatusMethodNotAllowed, "bad_request", "Method not allowed")
 	}
 }
 
 type CreatePlanStopRequest struct {
-	PlanVersionID    string `json:"planversionid"`
 	Position         int    `json:"position"`
 	Title            string `json:"title"`
 	CategoryLabel    string `json:"categorylabel"`
@@ -56,6 +50,8 @@ type CreatePlanStopRequest struct {
 }
 
 func (h *Handlers) create(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(">>> ENTERED PLAN STOP CREATE")
+	fmt.Println("===== PLAN STOP CREATE HANDLER =====")
 	var req CreatePlanStopRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -63,7 +59,7 @@ func (h *Handlers) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	planversionID, err := common.NewPlanVersionID(req.PlanVersionID)
+	planversionID, err := common.NewPlanVersionID(r.PathValue("id"))
 	if err != nil {
 		writeDomainError(w, r, err)
 		return
@@ -76,13 +72,15 @@ func (h *Handlers) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Planneddeparture, err := time.Parse(time.RFC3339, req.PlannedArrival)
+	Planneddeparture, err := time.Parse(time.RFC3339, req.PlannedDeparture)
 	if err != nil {
 		writeError(w, r, http.StatusBadRequest,
 			"bad_request",
 			"invalid planned_arrival")
 		return
 	}
+
+	fmt.Println("Before CreateStop")
 
 	planstop, err := h.createPlanStop.CreateStop(r.Context(), planversionID, command.CreatePlanStopCommand{
 		PlanVersionID:    planversionID,
@@ -96,7 +94,10 @@ func (h *Handlers) create(w http.ResponseWriter, r *http.Request) {
 		StayMinutes:      req.StayMinutes,
 		BusyRiskLabel:    req.BusyRiskLabel,
 	})
+	fmt.Println("After CreateStop")
 	if err != nil {
+		fmt.Printf("ERROR TYPE: %T\n", err)
+		fmt.Printf("ERROR: %+v\n", err)
 		writeDomainError(w, r, err)
 		return
 	}
@@ -106,7 +107,7 @@ func (h *Handlers) create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) listPlanstop(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("planversionid")
+	id := r.PathValue("id")
 
 	planversionID, err := common.NewPlanVersionID(id)
 	if err != nil {
@@ -119,6 +120,8 @@ func (h *Handlers) listPlanstop(w http.ResponseWriter, r *http.Request) {
 		planversionID,
 	)
 	if err != nil {
+		fmt.Printf("ERROR TYPE: %T\n", err)
+		fmt.Printf("ERROR: %+v\n", err)
 		writeDomainError(w, r, err)
 		return
 	}

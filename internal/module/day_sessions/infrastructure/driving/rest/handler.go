@@ -24,6 +24,7 @@ func NewHandler(createds *services.CreateDaySessionService, listds *services.Lis
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("=== DAY SESSION ServeHTTP ===", r.Method, r.URL.Path)
 
 	switch r.Method {
 
@@ -71,6 +72,7 @@ type CreateDaySessionRequest struct {
 }
 
 func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("===== DAY SESSION CREATE HANDLER =====")
 	tripid := r.PathValue("trip_id")
 	var req CreateDaySessionRequest
 

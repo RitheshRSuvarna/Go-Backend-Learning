@@ -35,6 +35,7 @@ func NewHandler(createpv *services.CreatePlanVersionService, getpln *services.Ge
 // }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("=== PlanVersion ServeHTTP ===", r.Method, r.URL.Path)
 
 	switch {
 
@@ -89,8 +90,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type CreatePlanVersionRequest struct {
-	Version      int    `json:"version"`
-	Note         string `json:"note"`
+	Version int    `json:"version"`
+	Note    string `json:"note"`
 }
 
 func (h *Handler) create(w http.ResponseWriter, r *http.Request) {

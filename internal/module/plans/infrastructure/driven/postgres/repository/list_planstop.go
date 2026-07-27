@@ -20,7 +20,7 @@ func (r *PostgresPlanStopRepository) ListStop(ctx context.Context, id common.Pla
 		return nil, fmt.Errorf("Failed to list plan stop:%w", err)
 	}
 
-	out := make([]*entity.PlanStop, len(row))
+	out := make([]*entity.PlanStop, 0, len(row))
 	for _, row := range row {
 		planstop, err := rowToDomainPlanStop(
 			row.ID,

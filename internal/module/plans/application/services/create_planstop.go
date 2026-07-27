@@ -1,13 +1,13 @@
 package services
 
 import (
-	// "time"
 	"common"
 	"context"
+	"fmt"
 	"plans/application/command"
 	"plans/application/dto"
-	"plans/domain/repository"
 	"plans/domain/entity"
+	"plans/domain/repository"
 )
 
 type CreatePlanStopService struct {
@@ -19,7 +19,7 @@ func NewCreatePlanStopService(planrepo repository.PlanStopRepository) *CreatePla
 }
 
 func (s *CreatePlanStopService) CreateStop(ctx context.Context, id common.PlanVersionID, cmd command.CreatePlanStopCommand) (dto.PlanStopDTO, error) {
-	
+
 	// arrival, err := time.Parse(
 	// 	time.RFC3339,
 	// 	cmd.PlannedArrival,
@@ -35,16 +35,23 @@ func (s *CreatePlanStopService) CreateStop(ctx context.Context, id common.PlanVe
 	// if err != nil {
 	// 	return dto.PlanStopDTO{}, err
 	// }
+	fmt.Println("Entered CreateStopService")
 
 	planstop, err := entity.NewPlanStop(
-		id, cmd.Position, cmd.Title, cmd.CategoryLabel, 
-		cmd.ImageURL, cmd.PlannedArrival, cmd.PlannedDeparture, 
+		id, cmd.Position, cmd.Title, cmd.CategoryLabel,
+		cmd.ImageURL, cmd.PlannedArrival, cmd.PlannedDeparture,
 		cmd.TravelMinutes, cmd.StayMinutes, cmd.BusyRiskLabel)
-		if err != nil {
-			return dto.PlanStopDTO{}, err
-		}
-		if err := s.planrepo.Create(ctx, planstop); err != nil {
-			return dto.PlanStopDTO{}, err
-		}
-		return dto.ToPlanStopDTO(planstop),nil
+	if err != nil {
+		return dto.PlanStopDTO{}, err
+	}
+
+	fmt.Println("Before repository Create")
+
+	if err := s.planrepo.Create(ctx, planstop); err != nil {
+		return dto.PlanStopDTO{}, err
+	}
+
+	fmt.Println("After repository Create")
+
+	return dto.ToPlanStopDTO(planstop), nil
 }
