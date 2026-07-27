@@ -85,6 +85,7 @@ func (h *Handlers) create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	planstop, err := h.createPlanStop.CreateStop(r.Context(), planversionID, command.CreatePlanStopCommand{
+		PlanVersionID:    planversionID,
 		Position:         req.Position,
 		Title:            req.Title,
 		CategoryLabel:    req.CategoryLabel,
