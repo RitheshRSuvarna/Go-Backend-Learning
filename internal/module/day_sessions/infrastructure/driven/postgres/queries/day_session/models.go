@@ -8,6 +8,14 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type AssistantSuggestion struct {
+	ID           pgtype.UUID        `json:"id"`
+	DaySessionID pgtype.UUID        `json:"day_session_id"`
+	Message      string             `json:"message"`
+	Status       string             `json:"status"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+}
+
 type DaySession struct {
 	ID         pgtype.UUID        `json:"id"`
 	TripID     pgtype.UUID        `json:"trip_id"`
@@ -17,6 +25,15 @@ type DaySession struct {
 	StartLat   pgtype.Float8      `json:"start_lat"`
 	StartLon   pgtype.Float8      `json:"start_lon"`
 	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+}
+
+type Event struct {
+	ID           pgtype.UUID        `json:"id"`
+	DaySessionID pgtype.UUID        `json:"day_session_id"`
+	Type         string             `json:"type"`
+	Ts           pgtype.Timestamptz `json:"ts"`
+	PayloadJson  []byte             `json:"payload_json"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
 }
 
 type PlanStop struct {

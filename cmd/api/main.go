@@ -56,10 +56,10 @@ func main() {
 	mux.Handle("/api/trips", http.StripPrefix("/api", initTripHandler(db)))
 	// mux.Handle("/api/day-sessions", http.StripPrefix("/api", initDaySessionHandler(db)))
 	mux.Handle("/api/day-sessions/{trip_id}", http.StripPrefix("/api", initDaySessionHandler(db)))
-	mux.Handle("/api/trips/{trip_id}/day-sessions/{date}", http.StripPrefix("/api", initDaySessionHandler(db)))
+	mux.Handle("/api/day-session/{id}", http.StripPrefix("/api", initDaySessionHandler(db)))
 	mux.Handle("/api/day-sessions/{id}/plan-versions", http.StripPrefix("/api", initPlanVersionHandler(db)))
 	mux.Handle("/api/day-sessions/{id}/stop", http.StripPrefix("/api", initPlanStopHandler(db)))
-	mux.Handle("/api/day-sessions/{id}/active-plan", http.StripPrefix("/api", initDaySessionHandler(db)))
+	mux.Handle("/api/day-sessions/{id}/active-plan", http.StripPrefix("/api", initPlanVersionHandler(db)))
 	mux.Handle("/api/day-sessions/{id}/suggestions", http.StripPrefix("/api", initAssistantSuggestionHandler(db)))
 	mux.Handle("/api/assistant-suggestions/{id}", http.StripPrefix("/api", initAssistantSuggestionHandler(db)))
 	mux.Handle("/api/day-sessions/{id}/events", http.StripPrefix("/api", initEventsHandler(db)))
@@ -111,9 +111,9 @@ func initDaySessionHandler(db *pgxpool.Pool) http.Handler {
 	planStopRepo := planrepository.NewPlanStopRepository(db)
 	eventRepo := eventrepository.NewEventsRepository(db)
 	createDaySessionSvc := daysessionservice.NewDaySessionService(daySessionRepo)
-	listDaySessionSvc := daysessionservice.NewListDaySessionService(daySessionRepo, planRepo, planStopRepo, eventRepo)
-	getByTripIDAndDateDaySessionSvc := daysessionservice.NewDaySessionListService(daySessionRepo)
-	return daysessionrest.NewHandler(createDaySessionSvc, listDaySessionSvc, getByTripIDAndDateDaySessionSvc)
+	listDaySessionSvc := daysessionservice.NewGetDaySessionService(daySessionRepo, planRepo, planStopRepo, eventRepo)
+	getDaySessionSvc := daysessionservice.NewListDaySessionService(daySessionRepo)
+	return daysessionrest.NewHandler(createDaySessionSvc, listDaySessionSvc, getDaySessionSvc)
 }
 
 func initPlanVersionHandler(db *pgxpool.Pool) http.Handler {

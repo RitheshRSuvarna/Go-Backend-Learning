@@ -21,7 +21,7 @@ func (d *CreateDaySessionService) CreateDaySession(ctx context.Context, cmd comm
 	if err != nil {
 		return dto.DaySessionDTO{}, err
 	}
-	if err := d.dayrepo.Create(ctx, daysession); err != nil {
+	if err := d.dayrepo.CreateDaySession(ctx, daysession); err != nil {
 		return dto.DaySessionDTO{}, err
 	}
 	return dto.ToDaySessionDTO(daysession), nil

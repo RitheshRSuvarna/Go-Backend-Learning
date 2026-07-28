@@ -16,10 +16,6 @@ func NewGetEventService(repo repository.EventsRepository) *GetEventService {
 }
 
 func (e *GetEventService) GetEvents(ctx context.Context, id common.DaySessionID) ([]dto.EventsDTO, error) {
-	// did, err := common.NewDaySessionID(id)
-	// if err != nil {
-	// 	return nil, common.NewValidationError("Invalid daysessionid", err)
-	// }
 	events, err := e.repo.GetEvents(ctx, id)
 	if err != nil {
 		return nil, err

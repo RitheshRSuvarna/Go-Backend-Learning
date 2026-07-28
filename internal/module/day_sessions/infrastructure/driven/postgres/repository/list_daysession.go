@@ -7,7 +7,7 @@ import (
 	"fmt"
 )
 
-func (r *PostgresDaySessionRepository) GetByID(
+func (r *PostgresDaySessionRepository) ListDaySession(
 	ctx context.Context,
 	id common.TripID,
 ) ([]*entity.DaySession, error) {
@@ -16,7 +16,7 @@ func (r *PostgresDaySessionRepository) GetByID(
 		return nil, err
 	}
 
-	rows, err := r.getQueries(ctx).GetByID(
+	rows, err := r.getQueries(ctx).ListDaySession(
 		ctx,
 		pgID,
 	)

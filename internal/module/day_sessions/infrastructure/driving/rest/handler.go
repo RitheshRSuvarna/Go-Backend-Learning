@@ -11,15 +11,15 @@ import (
 
 type Handler struct {
 	createDaysession *services.CreateDaySessionService
+	getDaysession    *services.GetDaySessionService
 	listDaysession   *services.ListDaySessionService
-	listDaysessionID *services.ListDaySessionServiceID
 }
 
-func NewHandler(createds *services.CreateDaySessionService, listds *services.ListDaySessionService, listdsid *services.ListDaySessionServiceID) *Handler {
+func NewHandler(createds *services.CreateDaySessionService, getds *services.GetDaySessionService, listds *services.ListDaySessionService) *Handler {
 	return &Handler{
 		createDaysession: createds,
+		getDaysession:    getds,
 		listDaysession:   listds,
-		listDaysessionID: listdsid,
 	}
 }
 
@@ -29,12 +29,12 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 
 	case http.MethodPost:
-    if tripID := r.PathValue("trip_id"); tripID != "" {
-        h.create(w, r)
-        return
-    }
+		if tripID := r.PathValue("trip_id"); tripID != "" {
+			h.create(w, r)
+			return
+		}
 
-    writeError(w, r, http.StatusNotFound, "not_found", "not found")
+		writeError(w, r, http.StatusNotFound, "not_found", "not found")
 
 	case http.MethodGet:
 
@@ -45,17 +45,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// GET /day-sessions?trip_id=...&date=...
-		if r.URL.Query().Get("trip_id") != "" &&
-			r.URL.Query().Get("date") != "" {
-			h.getByTripIDAndDate(w, r)
+		if id := r.PathValue("id"); id != "" {
+			h.getdaysession(w, r)
 			return
 		}
-
-		// // GET /day-sessions
-		// if r.URL.Path == "/day-sessions" {
-		// 	h.list(w, r)
-		// 	return
-		// }
 
 		writeError(w, r, http.StatusNotFound, "not_found", "not found")
 
@@ -99,24 +92,23 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(daysession)
 }
 
-func (h *Handler) getByTripIDAndDate(
-	w http.ResponseWriter,
-	r *http.Request,
-) {
-	tripID := r.URL.Query().Get("trip_id")
-	date := r.URL.Query().Get("date")
+func (h *Handler) getdaysession(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("===== ENTERED getdaysession HANDLER =====")
+	daysessionID := r.PathValue("id")
 
-	domainTripID, err := common.NewTripID(tripID)
+	domaindaysessionID, err := common.NewDaySessionID(daysessionID)
 	if err != nil {
 		writeDomainError(w, r, err)
 		return
 	}
+	fmt.Println("1. DONE")
 
-	daySession, err := h.listDaysession.GetByTripIDAndDate(
+	daySession, err := h.getDaysession.GetDaySession(
 		r.Context(),
-		domainTripID,
-		date,
+		domaindaysessionID,
 	)
+	fmt.Printf("result = %+v\n", daySession)
+	fmt.Printf("err = %v\n", err)
 	if err != nil {
 		writeDomainError(w, r, err)
 		return
@@ -142,7 +134,7 @@ func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	daySession, err := h.listDaysessionID.GetByID(
+	daySession, err := h.listDaysession.ListDaysession(
 		r.Context(),
 		tripID,
 	)

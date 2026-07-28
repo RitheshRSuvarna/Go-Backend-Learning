@@ -7,7 +7,7 @@ import (
 )
 
 type DaySessionRepository interface {
-	Create(ctx context.Context, daysession *entity.DaySession) error
-	GetByTripIDAndDate(ctx context.Context, tripID common.TripID, Date string) (*entity.DaySession, error)
-	GetByID(ctx context.Context, id common.TripID) ([]*entity.DaySession, error)
+	CreateDaySession(ctx context.Context, daysession *entity.DaySession) error
+	GetDaySession(ctx context.Context, id common.DaySessionID ) (*entity.DaySession, error)
+	ListDaySession(ctx context.Context, id common.TripID) ([]*entity.DaySession, error)
 }

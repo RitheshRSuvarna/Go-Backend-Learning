@@ -52,13 +52,13 @@ func (q *Queries) CreateDaySession(ctx context.Context, arg CreateDaySessionPara
 	return i, err
 }
 
-const getByID = `-- name: GetByID :many
+const getDaySession = `-- name: GetDaySession :one
 SELECT id, trip_id, date, start_time, start_label, created_at
 FROM day_sessions 
-WHERE trip_id= $1
+WHERE id = $1
 `
 
-type GetByIDRow struct {
+type GetDaySessionRow struct {
 	ID         pgtype.UUID        `json:"id"`
 	TripID     pgtype.UUID        `json:"trip_id"`
 	Date       pgtype.Date        `json:"date"`
@@ -67,15 +67,44 @@ type GetByIDRow struct {
 	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 }
 
-func (q *Queries) GetByID(ctx context.Context, tripID pgtype.UUID) ([]GetByIDRow, error) {
-	rows, err := q.db.Query(ctx, getByID, tripID)
+func (q *Queries) GetDaySession(ctx context.Context, id pgtype.UUID) (GetDaySessionRow, error) {
+	row := q.db.QueryRow(ctx, getDaySession, id)
+	var i GetDaySessionRow
+	err := row.Scan(
+		&i.ID,
+		&i.TripID,
+		&i.Date,
+		&i.StartTime,
+		&i.StartLabel,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const listDaySession = `-- name: ListDaySession :many
+SELECT id, trip_id, date, start_time, start_label, created_at
+FROM day_sessions 
+WHERE trip_id= $1
+`
+
+type ListDaySessionRow struct {
+	ID         pgtype.UUID        `json:"id"`
+	TripID     pgtype.UUID        `json:"trip_id"`
+	Date       pgtype.Date        `json:"date"`
+	StartTime  string             `json:"start_time"`
+	StartLabel string             `json:"start_label"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+}
+
+func (q *Queries) ListDaySession(ctx context.Context, tripID pgtype.UUID) ([]ListDaySessionRow, error) {
+	rows, err := q.db.Query(ctx, listDaySession, tripID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetByIDRow
+	var items []ListDaySessionRow
 	for rows.Next() {
-		var i GetByIDRow
+		var i ListDaySessionRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.TripID,
@@ -92,40 +121,4 @@ func (q *Queries) GetByID(ctx context.Context, tripID pgtype.UUID) ([]GetByIDRow
 		return nil, err
 	}
 	return items, nil
-}
-
-const getDaySessionByIDAndDate = `-- name: GetDaySessionByIDAndDate :one
-SELECT id, trip_id, date, start_time, start_label, created_at
-FROM day_sessions 
-WHERE trip_id = $1
-AND date = $2
-LIMIT 1
-`
-
-type GetDaySessionByIDAndDateParams struct {
-	TripID pgtype.UUID `json:"trip_id"`
-	Date   pgtype.Date `json:"date"`
-}
-
-type GetDaySessionByIDAndDateRow struct {
-	ID         pgtype.UUID        `json:"id"`
-	TripID     pgtype.UUID        `json:"trip_id"`
-	Date       pgtype.Date        `json:"date"`
-	StartTime  string             `json:"start_time"`
-	StartLabel string             `json:"start_label"`
-	CreatedAt  pgtype.Timestamptz `json:"created_at"`
-}
-
-func (q *Queries) GetDaySessionByIDAndDate(ctx context.Context, arg GetDaySessionByIDAndDateParams) (GetDaySessionByIDAndDateRow, error) {
-	row := q.db.QueryRow(ctx, getDaySessionByIDAndDate, arg.TripID, arg.Date)
-	var i GetDaySessionByIDAndDateRow
-	err := row.Scan(
-		&i.ID,
-		&i.TripID,
-		&i.Date,
-		&i.StartTime,
-		&i.StartLabel,
-		&i.CreatedAt,
-	)
-	return i, err
 }

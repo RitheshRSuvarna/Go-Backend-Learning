@@ -8,7 +8,7 @@ import (
 	"fmt"
 )
 
-func (r *PostgresDaySessionRepository) Create(ctx context.Context, daysession *entity.DaySession) error {
+func (r *PostgresDaySessionRepository) CreateDaySession(ctx context.Context, daysession *entity.DaySession) error {
 	date, err := dateStringToPGDate(daysession.Date())
 	if err != nil {
 		return common.NewValidationError("Invalid date", err)
