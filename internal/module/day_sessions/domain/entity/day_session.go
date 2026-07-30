@@ -6,12 +6,13 @@ import (
 )
 
 type DaySession struct {
-	id         common.DaySessionID
-	tripID     common.TripID
-	date       string
-	startTime  string
-	startLabel string
-	createdAt  common.Time
+	id                  common.DaySessionID
+	tripID              common.TripID
+	date                string
+	startTime           string
+	startLabel          string
+	activePlanVersionID *common.PlanVersionID
+	createdAt           common.Time
 }
 
 func NewDaySession(TripID, date, startTime, startLabel string) (*DaySession, error) {
@@ -35,11 +36,12 @@ func NewDaySession(TripID, date, startTime, startLabel string) (*DaySession, err
 	now := common.Now()
 
 	return &DaySession{
-		tripID:     domainTripID,
-		date:       date,
-		startTime:  startTime,
-		startLabel: startLabel,
-		createdAt:  now,
+		tripID:              domainTripID,
+		date:                date,
+		startTime:           startTime,
+		startLabel:          startLabel,
+		activePlanVersionID: nil,
+		createdAt:           now,
 	}, nil
 }
 
@@ -48,10 +50,15 @@ func (d *DaySession) TripID() common.TripID   { return d.tripID }
 func (d *DaySession) Date() string            { return d.date }
 func (d *DaySession) STime() string           { return d.startTime }
 func (d *DaySession) Label() string           { return d.startLabel }
+func (d *DaySession) ActivePlanVersionID() *common.PlanVersionID {return d.activePlanVersionID}
 func (d *DaySession) CreatedAt() common.Time  { return d.createdAt }
 
 func (d *DaySession) SetID(id common.DaySessionID) {
 	d.id = id
+}
+
+func (d *DaySession) SetActivePlanVersionID(id common.PlanVersionID) {
+	d.activePlanVersionID = &id
 }
 
 func (d *DaySession) AssignPresistance(id common.DaySessionID, createdAt common.Time) {
@@ -63,14 +70,16 @@ func RestoreDaySession(
 	id common.DaySessionID,
 	tripID common.TripID,
 	date, startTime, startLabel string,
+	activePlanVersionID *common.PlanVersionID,
 	createdAt common.Time,
 ) *DaySession {
 	return &DaySession{
-		id:         id,
-		tripID:     tripID,
-		date:       date,
-		startTime:  startTime,
-		startLabel: startLabel,
-		createdAt:  createdAt,
+		id:                  id,
+		tripID:              tripID,
+		date:                date,
+		startTime:           startTime,
+		startLabel:          startLabel,
+		activePlanVersionID: activePlanVersionID,
+		createdAt:           createdAt,
 	}
 }

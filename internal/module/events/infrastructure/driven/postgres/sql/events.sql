@@ -8,4 +8,3 @@ SELECT id, day_session_id, type, ts, payload_json, created_at
 FROM events
 WHERE day_session_id=$1
 ORDER BY created_at DESC;
-

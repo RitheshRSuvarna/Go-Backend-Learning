@@ -17,14 +17,15 @@ type AssistantSuggestion struct {
 }
 
 type DaySession struct {
-	ID         pgtype.UUID        `json:"id"`
-	TripID     pgtype.UUID        `json:"trip_id"`
-	Date       pgtype.Date        `json:"date"`
-	StartTime  string             `json:"start_time"`
-	StartLabel string             `json:"start_label"`
-	StartLat   pgtype.Float8      `json:"start_lat"`
-	StartLon   pgtype.Float8      `json:"start_lon"`
-	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	ID                  pgtype.UUID        `json:"id"`
+	TripID              pgtype.UUID        `json:"trip_id"`
+	Date                pgtype.Date        `json:"date"`
+	StartTime           string             `json:"start_time"`
+	StartLabel          string             `json:"start_label"`
+	StartLat            pgtype.Float8      `json:"start_lat"`
+	StartLon            pgtype.Float8      `json:"start_lon"`
+	CreatedAt           pgtype.Timestamptz `json:"created_at"`
+	ActivePlanVersionID pgtype.UUID        `json:"active_plan_version_id"`
 }
 
 type Event struct {

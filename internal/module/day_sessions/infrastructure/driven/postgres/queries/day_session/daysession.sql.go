@@ -14,7 +14,7 @@ import (
 const createDaySession = `-- name: CreateDaySession :one
 INSERT INTO day_sessions (trip_id, date, start_time,start_label)
 VALUES($1, $2, $3, $4)
-RETURNING id, trip_id, date, start_time, start_label, created_at
+RETURNING id, trip_id, date, start_time, start_label, active_plan_version_id, created_at
 `
 
 type CreateDaySessionParams struct {
@@ -25,12 +25,13 @@ type CreateDaySessionParams struct {
 }
 
 type CreateDaySessionRow struct {
-	ID         pgtype.UUID        `json:"id"`
-	TripID     pgtype.UUID        `json:"trip_id"`
-	Date       pgtype.Date        `json:"date"`
-	StartTime  string             `json:"start_time"`
-	StartLabel string             `json:"start_label"`
-	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	ID                  pgtype.UUID        `json:"id"`
+	TripID              pgtype.UUID        `json:"trip_id"`
+	Date                pgtype.Date        `json:"date"`
+	StartTime           string             `json:"start_time"`
+	StartLabel          string             `json:"start_label"`
+	ActivePlanVersionID pgtype.UUID        `json:"active_plan_version_id"`
+	CreatedAt           pgtype.Timestamptz `json:"created_at"`
 }
 
 func (q *Queries) CreateDaySession(ctx context.Context, arg CreateDaySessionParams) (CreateDaySessionRow, error) {
@@ -47,24 +48,26 @@ func (q *Queries) CreateDaySession(ctx context.Context, arg CreateDaySessionPara
 		&i.Date,
 		&i.StartTime,
 		&i.StartLabel,
+		&i.ActivePlanVersionID,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getDaySession = `-- name: GetDaySession :one
-SELECT id, trip_id, date, start_time, start_label, created_at
+SELECT id, trip_id, date, start_time, start_label, active_plan_version_id, created_at
 FROM day_sessions 
 WHERE id = $1
 `
 
 type GetDaySessionRow struct {
-	ID         pgtype.UUID        `json:"id"`
-	TripID     pgtype.UUID        `json:"trip_id"`
-	Date       pgtype.Date        `json:"date"`
-	StartTime  string             `json:"start_time"`
-	StartLabel string             `json:"start_label"`
-	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	ID                  pgtype.UUID        `json:"id"`
+	TripID              pgtype.UUID        `json:"trip_id"`
+	Date                pgtype.Date        `json:"date"`
+	StartTime           string             `json:"start_time"`
+	StartLabel          string             `json:"start_label"`
+	ActivePlanVersionID pgtype.UUID        `json:"active_plan_version_id"`
+	CreatedAt           pgtype.Timestamptz `json:"created_at"`
 }
 
 func (q *Queries) GetDaySession(ctx context.Context, id pgtype.UUID) (GetDaySessionRow, error) {
@@ -76,24 +79,26 @@ func (q *Queries) GetDaySession(ctx context.Context, id pgtype.UUID) (GetDaySess
 		&i.Date,
 		&i.StartTime,
 		&i.StartLabel,
+		&i.ActivePlanVersionID,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const listDaySession = `-- name: ListDaySession :many
-SELECT id, trip_id, date, start_time, start_label, created_at
+SELECT id, trip_id, date, start_time, start_label, active_plan_version_id, created_at
 FROM day_sessions 
 WHERE trip_id= $1
 `
 
 type ListDaySessionRow struct {
-	ID         pgtype.UUID        `json:"id"`
-	TripID     pgtype.UUID        `json:"trip_id"`
-	Date       pgtype.Date        `json:"date"`
-	StartTime  string             `json:"start_time"`
-	StartLabel string             `json:"start_label"`
-	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	ID                  pgtype.UUID        `json:"id"`
+	TripID              pgtype.UUID        `json:"trip_id"`
+	Date                pgtype.Date        `json:"date"`
+	StartTime           string             `json:"start_time"`
+	StartLabel          string             `json:"start_label"`
+	ActivePlanVersionID pgtype.UUID        `json:"active_plan_version_id"`
+	CreatedAt           pgtype.Timestamptz `json:"created_at"`
 }
 
 func (q *Queries) ListDaySession(ctx context.Context, tripID pgtype.UUID) ([]ListDaySessionRow, error) {
@@ -111,6 +116,7 @@ func (q *Queries) ListDaySession(ctx context.Context, tripID pgtype.UUID) ([]Lis
 			&i.Date,
 			&i.StartTime,
 			&i.StartLabel,
+			&i.ActivePlanVersionID,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err

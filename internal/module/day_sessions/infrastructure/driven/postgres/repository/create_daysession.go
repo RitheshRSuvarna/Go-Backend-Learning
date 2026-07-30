@@ -35,6 +35,7 @@ func (r *PostgresDaySessionRepository) CreateDaySession(ctx context.Context, day
 		row.Date,
 		row.StartTime,
 		row.StartLabel,
+		row.ActivePlanVersionID,
 		row.CreatedAt,
 	)
 	if err != nil {

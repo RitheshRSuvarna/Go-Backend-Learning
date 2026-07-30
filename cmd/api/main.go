@@ -141,7 +141,9 @@ func initAssistantSuggestionHandler(db *pgxpool.Pool) http.Handler {
 
 func initEventsHandler(db *pgxpool.Pool) http.Handler {
 	eventsrepo := eventrepository.NewEventsRepository(db)
-	createventsvc := eventservice.NewCreateEventsService(eventsrepo)
+	planRepo := planrepository.NewPlanVersionRepository(db)
+	planStopRepo := planrepository.NewPlanStopRepository(db)
+	createventsvc := eventservice.NewCreateEventsService(eventsrepo, planRepo, planStopRepo)
 	geteventsvc := eventservice.NewGetEventService(eventsrepo)
 	return eventrest.NewHandler(createventsvc, geteventsvc)
 }

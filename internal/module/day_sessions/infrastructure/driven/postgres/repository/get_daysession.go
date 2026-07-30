@@ -26,6 +26,7 @@ func (r *PostgresDaySessionRepository) GetDaySession(
 		row.Date,
 		row.StartTime,
 		row.StartLabel,
+		row.ActivePlanVersionID,
 		row.CreatedAt,
 	)
 	if err != nil {
