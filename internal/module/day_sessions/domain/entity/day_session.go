@@ -45,13 +45,13 @@ func NewDaySession(TripID, date, startTime, startLabel string) (*DaySession, err
 	}, nil
 }
 
-func (d *DaySession) ID() common.DaySessionID { return d.id }
-func (d *DaySession) TripID() common.TripID   { return d.tripID }
-func (d *DaySession) Date() string            { return d.date }
-func (d *DaySession) STime() string           { return d.startTime }
-func (d *DaySession) Label() string           { return d.startLabel }
-func (d *DaySession) ActivePlanVersionID() *common.PlanVersionID {return d.activePlanVersionID}
-func (d *DaySession) CreatedAt() common.Time  { return d.createdAt }
+func (d *DaySession) ID() common.DaySessionID                    { return d.id }
+func (d *DaySession) TripID() common.TripID                      { return d.tripID }
+func (d *DaySession) Date() string                               { return d.date }
+func (d *DaySession) STime() string                              { return d.startTime }
+func (d *DaySession) Label() string                              { return d.startLabel }
+func (d *DaySession) ActivePlanVersionID() *common.PlanVersionID { return d.activePlanVersionID }
+func (d *DaySession) CreatedAt() common.Time                     { return d.createdAt }
 
 func (d *DaySession) SetID(id common.DaySessionID) {
 	d.id = id
