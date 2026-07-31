@@ -118,8 +118,9 @@ func initDaySessionHandler(db *pgxpool.Pool) http.Handler {
 
 func initPlanVersionHandler(db *pgxpool.Pool) http.Handler {
 	planVersionRepo := planrepository.NewPlanVersionRepository(db)
+	daysessionRepo := daysessionrepository.NewDaySessionRepository(db)
 	createPlanVersionSvc := planservice.NewCreatePlanVersionService(planVersionRepo)
-	getPlanVersionSvc := planservice.NewGetByIDPlanVersionService(planVersionRepo)
+	getPlanVersionSvc := planservice.NewGetByIDPlanVersionService(planVersionRepo, daysessionRepo)
 	listPlanVersionSvc := planservice.NewListPlanVersionService(planVersionRepo)
 	return planversionrest.NewHandler(createPlanVersionSvc, getPlanVersionSvc, listPlanVersionSvc)
 }

@@ -57,6 +57,25 @@ func (q *Queries) GetActivePlan(ctx context.Context, daySessionID pgtype.UUID) (
 	return i, err
 }
 
+const getPlanVersionByID = `-- name: GetPlanVersionByID :one
+SELECT id, day_session_id, version, notes, created_at
+FROM plan_versions
+WHERE id = $1
+`
+
+func (q *Queries) GetPlanVersionByID(ctx context.Context, id pgtype.UUID) (PlanVersion, error) {
+	row := q.db.QueryRow(ctx, getPlanVersionByID, id)
+	var i PlanVersion
+	err := row.Scan(
+		&i.ID,
+		&i.DaySessionID,
+		&i.Version,
+		&i.Notes,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const listPlanVersionsByDaySessionID = `-- name: ListPlanVersionsByDaySessionID :many
 SELECT id, day_session_id, version, notes, created_at
 FROM plan_versions

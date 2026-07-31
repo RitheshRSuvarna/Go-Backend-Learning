@@ -10,6 +10,11 @@ WHERE day_session_id = $1
 ORDER BY version DESC
 LIMIT 1;
 
+-- name: GetPlanVersionByID :one
+SELECT id, day_session_id, version, notes, created_at
+FROM plan_versions
+WHERE id = $1;
+
 -- name: ListPlanVersionsByDaySessionID :many
 SELECT id, day_session_id, version, notes, created_at
 FROM plan_versions

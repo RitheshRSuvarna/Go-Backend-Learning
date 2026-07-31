@@ -28,7 +28,7 @@ func (s *GetByIDPlanVersionService) GetActivePlan(ctx context.Context, id common
 	}
 
 	if daysession.ActivePlanVersionID() != nil {
-		planversion, err := s.versionrepo.GetActivePlan(ctx, *daysession.ActivePlanVersionID())
+		planversion, err := s.versionrepo.GetByID(ctx, *daysession.ActivePlanVersionID())
 		if err != nil {
 			return dto.PlanVersionDTO{}, err
 		}

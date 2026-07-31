@@ -9,5 +9,6 @@ import (
 type PlanVersionRepository interface {
 	Create(ctx context.Context, planversion *entity.PlanVersion) error
 	GetActivePlan(ctx context.Context, id common.DaySessionID) (*entity.PlanVersion, error)
+	GetByID(ctx context.Context, id common.PlanVersionID) (*entity.PlanVersion, error)
 	ListPlanVersion(ctx context.Context, id common.DaySessionID) ([]*entity.PlanVersion, error)
 }
