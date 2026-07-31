@@ -61,6 +61,7 @@ func main() {
 	mux.Handle("/api/day-sessions/{id}/stop", http.StripPrefix("/api", initPlanStopHandler(db)))
 	mux.Handle("/api/day-sessions/{id}/active-plan", http.StripPrefix("/api", initPlanVersionHandler(db)))
 	mux.Handle("/api/day-sessions/{id}/suggestions", http.StripPrefix("/api", initAssistantSuggestionHandler(db)))
+	mux.Handle("/api/day-sessions/{id}/active-plan/{vid}", http.StripPrefix("/api", initDaySessionHandler(db)))
 	mux.Handle("/api/assistant-suggestions/{id}", http.StripPrefix("/api", initAssistantSuggestionHandler(db)))
 	mux.Handle("/api/day-sessions/{id}/events", http.StripPrefix("/api", initEventsHandler(db)))
 
@@ -113,7 +114,8 @@ func initDaySessionHandler(db *pgxpool.Pool) http.Handler {
 	createDaySessionSvc := daysessionservice.NewDaySessionService(daySessionRepo)
 	listDaySessionSvc := daysessionservice.NewGetDaySessionService(daySessionRepo, planRepo, planStopRepo, eventRepo)
 	getDaySessionSvc := daysessionservice.NewListDaySessionService(daySessionRepo)
-	return daysessionrest.NewHandler(createDaySessionSvc, listDaySessionSvc, getDaySessionSvc)
+	updateActivePlanSvc := daysessionservice.NewSetActivePlanService(daySessionRepo)
+	return daysessionrest.NewHandler(createDaySessionSvc, listDaySessionSvc, getDaySessionSvc, updateActivePlanSvc)
 }
 
 func initPlanVersionHandler(db *pgxpool.Pool) http.Handler {

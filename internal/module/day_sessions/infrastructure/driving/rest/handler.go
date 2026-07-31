@@ -13,13 +13,15 @@ type Handler struct {
 	createDaysession *services.CreateDaySessionService
 	getDaysession    *services.GetDaySessionService
 	listDaysession   *services.ListDaySessionService
+	setActivePlan *services.SetActivePlanService
 }
 
-func NewHandler(createds *services.CreateDaySessionService, getds *services.GetDaySessionService, listds *services.ListDaySessionService) *Handler {
+func NewHandler(createds *services.CreateDaySessionService, getds *services.GetDaySessionService, listds *services.ListDaySessionService, updtactpln *services.SetActivePlanService) *Handler {
 	return &Handler{
 		createDaysession: createds,
 		getDaysession:    getds,
 		listDaysession:   listds,
+		setActivePlan: updtactpln,
 	}
 }
 
@@ -51,6 +53,17 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		writeError(w, r, http.StatusNotFound, "not_found", "not found")
+
+	case http.MethodPut:
+
+    	daySessionID := r.PathValue("id")
+    	planVersionID := r.PathValue("planVersionId")
+
+    	if daySessionID == "" || planVersionID == "" {
+        	writeError(w, r, http.StatusBadRequest, "bad_request", "missing path parameter")
+        	return
+    	}
+    	h.updateActivePlan(w, r, daySessionID, planVersionID)
 
 	default:
 		writeError(w, r, http.StatusMethodNotAllowed, "bad_request", "method not allowed")
@@ -149,4 +162,32 @@ func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(daySession); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+}
+
+
+func (h *Handler) updateActivePlan(
+    w http.ResponseWriter,
+    r *http.Request,
+    daySessionID string,
+    planVersionID string,
+) {
+    dsID, err := common.NewDaySessionID(daySessionID)
+    if err != nil {
+        // handle error
+        return
+    }
+
+    pvID, err := common.NewPlanVersionID(planVersionID)
+    if err != nil {
+        // handle error
+        return
+    }
+
+    err = h.setActivePlan.UpdateActivePlan(r.Context(), dsID, pvID)
+    if err != nil {
+        // handle error
+        return
+    }
+
+    w.WriteHeader(http.StatusNoContent)
 }

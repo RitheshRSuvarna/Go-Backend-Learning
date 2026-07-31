@@ -88,7 +88,7 @@ func (q *Queries) GetDaySession(ctx context.Context, id pgtype.UUID) (GetDaySess
 const listDaySession = `-- name: ListDaySession :many
 SELECT id, trip_id, date, start_time, start_label, active_plan_version_id, created_at
 FROM day_sessions 
-WHERE trip_id= $1
+WHERE trip_id = $1
 `
 
 type ListDaySessionRow struct {
@@ -127,4 +127,20 @@ func (q *Queries) ListDaySession(ctx context.Context, tripID pgtype.UUID) ([]Lis
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateActivePlan = `-- name: UpdateActivePlan :exec
+UPDATE day_sessions
+SET active_plan_version_id = $2
+WHERE id = $1
+`
+
+type UpdateActivePlanParams struct {
+	ID                  pgtype.UUID `json:"id"`
+	ActivePlanVersionID pgtype.UUID `json:"active_plan_version_id"`
+}
+
+func (q *Queries) UpdateActivePlan(ctx context.Context, arg UpdateActivePlanParams) error {
+	_, err := q.db.Exec(ctx, updateActivePlan, arg.ID, arg.ActivePlanVersionID)
+	return err
 }

@@ -11,4 +11,9 @@ WHERE id = $1;
 -- name: ListDaySession :many  
 SELECT id, trip_id, date, start_time, start_label, active_plan_version_id, created_at
 FROM day_sessions 
-WHERE trip_id= $1;
+WHERE trip_id = $1;
+
+-- name: UpdateActivePlan :exec
+UPDATE day_sessions
+SET active_plan_version_id = $2
+WHERE id = $1;
