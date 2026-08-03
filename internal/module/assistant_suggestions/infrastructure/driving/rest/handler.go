@@ -70,6 +70,20 @@ type CreateAssistantSuggestionRequest struct {
 	Status       string `json:"status"`
 }
 
+// CreateAssistantSuggestion godoc
+//
+// @Summary Create an assistant suggestion
+// @Description Creates a new assistant suggestion for the specified day session.
+// @Tags Assistant Suggestions
+// @Accept json
+// @Produce json
+// @Param id path string true "Day Session ID"
+// @Param request body CreateAssistantSuggestionRequest true "Assistant suggestion details"
+// @Success 201 {object} CreateAssistantSuggestionResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /day-sessions/{id}/assistant-suggestions [post]
 func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 	var req CreateAssistantSuggestionRequest
 

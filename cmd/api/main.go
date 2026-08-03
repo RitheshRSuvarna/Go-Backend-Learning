@@ -31,7 +31,16 @@ import (
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/joho/godotenv"
 	"github.com/pressly/goose/v3"
+
+	_ "api/internal/swaggerdoc" // swagger docs
+
+	httpSwagger "github.com/swaggo/http-swagger" // http-swagger middleware
 )
+
+//	@title			Trip-Itinary API
+//	@version		1.0
+//	@description	This is all apis for the trip-itinary application.
+//	@termsOfService	http://swagger.io/terms/
 
 func main() {
 	loadEnv()
@@ -53,8 +62,8 @@ func main() {
 
 	mux := http.NewServeMux()
 
+	mux.Handle("/swagger/", httpSwagger.WrapHandler)
 	mux.Handle("/api/trips", http.StripPrefix("/api", initTripHandler(db)))
-	// mux.Handle("/api/day-sessions", http.StripPrefix("/api", initDaySessionHandler(db)))
 	mux.Handle("/api/day-sessions/{trip_id}", http.StripPrefix("/api", initDaySessionHandler(db)))
 	mux.Handle("/api/day-session/{id}", http.StripPrefix("/api", initDaySessionHandler(db)))
 	mux.Handle("/api/day-sessions/{id}/plan-versions", http.StripPrefix("/api", initPlanVersionHandler(db)))
