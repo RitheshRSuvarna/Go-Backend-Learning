@@ -15,7 +15,267 @@ const docTemplate = `{
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {}
+    "paths": {
+        "/api/trips": {
+            "get": {
+                "description": "List all the trips created with trip id.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Trip"
+                ],
+                "summary": "List all the Trips",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/trip_application_dto.TripDTO"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_trips_infrastructure_driving_rest.apiError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new trip for the specified destination and dates.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Trip"
+                ],
+                "summary": "Create a Trip",
+                "parameters": [
+                    {
+                        "description": "Trip details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_trips_infrastructure_driving_rest.CreateTripRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/trip_application_dto.TripDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_trips_infrastructure_driving_rest.apiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_trips_infrastructure_driving_rest.apiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_trips_infrastructure_driving_rest.apiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/day-sessions/{id}/assistant-suggestions": {
+            "post": {
+                "description": "Creates a new assistant suggestion for the specified day session.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Assistant_Suggestions"
+                ],
+                "summary": "Create an assistant suggestion",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Day Session ID",
+                        "name": "id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Assistant suggestion details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_assistant_suggestions_infrastructure_driving_rest.CreateAssistantSuggestionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/assistant_suggestions_application_dto.AssistantSuggestionsDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_assistant_suggestions_infrastructure_driving_rest.apiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_assistant_suggestions_infrastructure_driving_rest.apiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_assistant_suggestions_infrastructure_driving_rest.apiError"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "assistant_suggestions_application_dto.AssistantSuggestionsDTO": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "daysessionID": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_module_assistant_suggestions_infrastructure_driving_rest.CreateAssistantSuggestionRequest": {
+            "type": "object",
+            "properties": {
+                "day_session_id": {
+                    "description": "Day session id",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Message by the assistant",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "Status (pending, accepted, snoozed)",
+                    "type": "string"
+                }
+            }
+        },
+        "internal_module_assistant_suggestions_infrastructure_driving_rest.apiError": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "object",
+                    "properties": {
+                        "code": {
+                            "type": "string"
+                        },
+                        "message": {
+                            "type": "string"
+                        },
+                        "requestID": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "internal_module_trips_infrastructure_driving_rest.CreateTripRequest": {
+            "type": "object",
+            "properties": {
+                "destination": {
+                    "description": "Destination city",
+                    "type": "string"
+                },
+                "end_date": {
+                    "description": "End Date",
+                    "type": "string"
+                },
+                "start_date": {
+                    "description": "Start Date",
+                    "type": "string"
+                },
+                "travelers_count": {
+                    "description": "Number of Travelers",
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_module_trips_infrastructure_driving_rest.apiError": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "object",
+                    "properties": {
+                        "code": {
+                            "type": "string"
+                        },
+                        "message": {
+                            "type": "string"
+                        },
+                        "requestID": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "trip_application_dto.TripDTO": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "destination": {
+                    "type": "string"
+                },
+                "endDate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "travelersCount": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it

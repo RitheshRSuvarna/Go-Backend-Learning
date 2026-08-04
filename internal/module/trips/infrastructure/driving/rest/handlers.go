@@ -92,8 +92,8 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 // @Description List all the trips created with trip id.
 // @Tags Trip
 // @Produce json
-// @Success 200 {array} dto.Tripdto
-// @Failure 500 {object} ErrorResponse
+// @Success 200 {array} dto.TripDTO
+// @Failure 500 {object} apiError
 // @Router /api/trips [get]
 func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
 	trips, err := h.listTrips.ListTrips(r.Context())

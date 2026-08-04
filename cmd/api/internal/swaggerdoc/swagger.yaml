@@ -1,8 +1,179 @@
+definitions:
+  assistant_suggestions_application_dto.AssistantSuggestionsDTO:
+    properties:
+      createdAt:
+        type: string
+      daysessionID:
+        type: string
+      id:
+        type: string
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  internal_module_assistant_suggestions_infrastructure_driving_rest.CreateAssistantSuggestionRequest:
+    properties:
+      day_session_id:
+        description: Day session id
+        type: string
+      message:
+        description: Message by the assistant
+        type: string
+      status:
+        description: Status (pending, accepted, snoozed)
+        type: string
+    type: object
+  internal_module_assistant_suggestions_infrastructure_driving_rest.apiError:
+    properties:
+      error:
+        properties:
+          code:
+            type: string
+          message:
+            type: string
+          requestID:
+            type: string
+        type: object
+    type: object
+  internal_module_trips_infrastructure_driving_rest.CreateTripRequest:
+    properties:
+      destination:
+        description: Destination city
+        type: string
+      end_date:
+        description: End Date
+        type: string
+      start_date:
+        description: Start Date
+        type: string
+      travelers_count:
+        description: Number of Travelers
+        type: integer
+    type: object
+  internal_module_trips_infrastructure_driving_rest.apiError:
+    properties:
+      error:
+        properties:
+          code:
+            type: string
+          message:
+            type: string
+          requestID:
+            type: string
+        type: object
+    type: object
+  trip_application_dto.TripDTO:
+    properties:
+      createdAt:
+        type: string
+      destination:
+        type: string
+      endDate:
+        type: string
+      id:
+        type: string
+      startDate:
+        type: string
+      travelersCount:
+        type: integer
+    type: object
 info:
   contact: {}
   description: This is all apis for the trip-itinary application.
   termsOfService: http://swagger.io/terms/
   title: Trip-Itinary API
   version: "1.0"
-paths: {}
+paths:
+  /api/trips:
+    get:
+      description: List all the trips created with trip id.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/trip_application_dto.TripDTO'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_module_trips_infrastructure_driving_rest.apiError'
+      summary: List all the Trips
+      tags:
+      - Trip
+    post:
+      consumes:
+      - application/json
+      description: Creates a new trip for the specified destination and dates.
+      parameters:
+      - description: Trip details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_module_trips_infrastructure_driving_rest.CreateTripRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/trip_application_dto.TripDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_module_trips_infrastructure_driving_rest.apiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_module_trips_infrastructure_driving_rest.apiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_module_trips_infrastructure_driving_rest.apiError'
+      summary: Create a Trip
+      tags:
+      - Trip
+  /day-sessions/{id}/assistant-suggestions:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new assistant suggestion for the specified day session.
+      parameters:
+      - description: Day Session ID
+        in: header
+        name: id
+        required: true
+        type: string
+      - description: Assistant suggestion details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_module_assistant_suggestions_infrastructure_driving_rest.CreateAssistantSuggestionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/assistant_suggestions_application_dto.AssistantSuggestionsDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_module_assistant_suggestions_infrastructure_driving_rest.apiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_module_assistant_suggestions_infrastructure_driving_rest.apiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_module_assistant_suggestions_infrastructure_driving_rest.apiError'
+      summary: Create an assistant suggestion
+      tags:
+      - Assistant_Suggestions
 swagger: "2.0"
