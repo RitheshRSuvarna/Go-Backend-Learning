@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"trip/application/command"
+	_ "trip/application/dto"
 	"trip/application/services"
 )
 

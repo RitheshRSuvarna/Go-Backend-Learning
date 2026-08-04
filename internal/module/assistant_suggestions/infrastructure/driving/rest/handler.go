@@ -3,6 +3,7 @@ package rest
 import (
 	"assistant_suggestions/application/command"
 	"assistant_suggestions/application/services"
+	_ "assistant_suggestions/application/dto"
 	"common"
 	"encoding/json"
 	"fmt"
