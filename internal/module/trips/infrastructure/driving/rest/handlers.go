@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"trip/application/command"
 	"trip/application/services"
-	_ "trip/application/dto"
 )
 
 type Handler struct {
