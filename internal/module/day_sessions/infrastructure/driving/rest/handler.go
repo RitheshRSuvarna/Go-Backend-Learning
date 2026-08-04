@@ -3,6 +3,7 @@ package rest
 import (
 	"common"
 	"day_session/application/command"
+	_ "day_session/application/dto"
 	"day_session/application/services"
 	"encoding/json"
 	"fmt"
@@ -13,7 +14,7 @@ type Handler struct {
 	createDaysession *services.CreateDaySessionService
 	getDaysession    *services.GetDaySessionService
 	listDaysession   *services.ListDaySessionService
-	setActivePlan *services.SetActivePlanService
+	setActivePlan    *services.SetActivePlanService
 }
 
 func NewHandler(createds *services.CreateDaySessionService, getds *services.GetDaySessionService, listds *services.ListDaySessionService, updtactpln *services.SetActivePlanService) *Handler {
@@ -21,7 +22,7 @@ func NewHandler(createds *services.CreateDaySessionService, getds *services.GetD
 		createDaysession: createds,
 		getDaysession:    getds,
 		listDaysession:   listds,
-		setActivePlan: updtactpln,
+		setActivePlan:    updtactpln,
 	}
 }
 
@@ -56,14 +57,14 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	case http.MethodPut:
 
-    	daySessionID := r.PathValue("id")
-    	planVersionID := r.PathValue("planVersionId")
+		daySessionID := r.PathValue("id")
+		planVersionID := r.PathValue("planVersionId")
 
-    	if daySessionID == "" || planVersionID == "" {
-        	writeError(w, r, http.StatusBadRequest, "bad_request", "missing path parameter")
-        	return
-    	}
-    	h.updateActivePlan(w, r, daySessionID, planVersionID)
+		if daySessionID == "" || planVersionID == "" {
+			writeError(w, r, http.StatusBadRequest, "bad_request", "missing path parameter")
+			return
+		}
+		h.updateActivePlan(w, r, daySessionID, planVersionID)
 
 	default:
 		writeError(w, r, http.StatusMethodNotAllowed, "bad_request", "method not allowed")
@@ -72,18 +73,31 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 type CreateDaySessionRequest struct {
 	// Trip id
-	TripID     string `json:"trip_id"`
-	
+	TripID string `json:"trip_id"`
+
 	// Date
-	Date       string `json:"date"`
-	
+	Date string `json:"date"`
+
 	// Day session starting time
-	StartTime  string `json:"start_time"`
-	
+	StartTime string `json:"start_time"`
+
 	// Starting Place
 	StartLabel string `json:"start_label"`
 }
 
+// CreateDaySessions godoc
+// @Summary Create a Daysessions
+// @Description Creates daysessions for the specified Trip.
+// @Tags DaySession
+// @Accept json
+// @Produce json
+// @Param x-trip_id header string true "Trip ID"
+// @Param request body CreateDaySessionRequest true "DaySession details"
+// @Success 201 {object} dto.DaySessionDTO
+// @Failure 400 {object} apiError
+// @Failure 404 {object} apiError
+// @Failure 500 {object} apiError
+// @Router /api/day_sessions/{trip_id} [post]
 func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("===== DAY SESSION CREATE HANDLER =====")
 	tripid := r.PathValue("trip_id")
@@ -112,6 +126,18 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(daysession)
 }
 
+// GetDaySessions godoc
+// @Summary Gets a specfic Daysession by daysession id
+// @Description Gets a daysession from the specified Trip.
+// @Tags DaySession
+// @Accept json
+// @Produce json
+// @Param id header string true "daysession ID"
+// @Success 201 {object} dto.DaySessionDTO
+// @Failure 400 {object} apiError
+// @Failure 404 {object} apiError
+// @Failure 500 {object} apiError
+// @Router /api/day_sessions/{id} [get]
 func (h *Handler) getdaysession(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("===== ENTERED getdaysession HANDLER =====")
 	daysessionID := r.PathValue("id")
@@ -145,6 +171,19 @@ func (h *Handler) getdaysession(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// ListDaySessions godoc
+// @Summary List all the Daysessions
+// @Description List daysessions for the specified Trip.
+// @Tags DaySession
+// @Accept json
+// @Produce json
+// @Param x-trip_id header string true "Trip ID"
+// @Param request body CreateDaySessionRequest true "DaySession details"
+// @Success 201 {object} dto.DaySessionDTO
+// @Failure 400 {object} apiError
+// @Failure 404 {object} apiError
+// @Failure 500 {object} apiError
+// @Router /api/day_sessions/{trip_id} [get]
 func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("trip_id")
 
@@ -171,30 +210,42 @@ func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
+// UpdatesActivePlan godoc
+// @Summary Updates active plan
+// @Description updates the active plan of the day session.
+// @Tags DaySession
+// @Accept json
+// @Produce json
+// @Param x-d header string true "Trip ID"
+// @Param x-vid header string true "Planversion ID"
+// @Success 201 {object} dto.DaySessionDTO
+// @Failure 400 {object} apiError
+// @Failure 404 {object} apiError
+// @Failure 500 {object} apiError
+// @Router /api/day_sessions/{id}/active-plan/{vid} [put]
 func (h *Handler) updateActivePlan(
-    w http.ResponseWriter,
-    r *http.Request,
-    daySessionID string,
-    planVersionID string,
+	w http.ResponseWriter,
+	r *http.Request,
+	daySessionID string,
+	planVersionID string,
 ) {
-    dsID, err := common.NewDaySessionID(daySessionID)
-    if err != nil {
-        // handle error
-        return
-    }
+	dsID, err := common.NewDaySessionID(daySessionID)
+	if err != nil {
+		// handle error
+		return
+	}
 
-    pvID, err := common.NewPlanVersionID(planVersionID)
-    if err != nil {
-        // handle error
-        return
-    }
+	pvID, err := common.NewPlanVersionID(planVersionID)
+	if err != nil {
+		// handle error
+		return
+	}
 
-    err = h.setActivePlan.UpdateActivePlan(r.Context(), dsID, pvID)
-    if err != nil {
-        // handle error
-        return
-    }
+	err = h.setActivePlan.UpdateActivePlan(r.Context(), dsID, pvID)
+	if err != nil {
+		// handle error
+		return
+	}
 
-    w.WriteHeader(http.StatusNoContent)
+	w.WriteHeader(http.StatusNoContent)
 }

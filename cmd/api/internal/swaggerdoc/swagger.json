@@ -8,6 +8,339 @@
         "version": "1.0"
     },
     "paths": {
+        "/api/day-sessions/{id}/events": {
+            "get": {
+                "description": "Gets all the events recorded.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Get Event",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Daysession ID",
+                        "name": "x-id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/events_application_dto.EventsDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_events_infrastructure_driving_rest.apiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_events_infrastructure_driving_rest.apiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_events_infrastructure_driving_rest.apiError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create events to track daysession.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Create an Event",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Daysession ID",
+                        "name": "x-id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Event details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_events_infrastructure_driving_rest.CreateEventRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/events_application_dto.EventsDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_events_infrastructure_driving_rest.apiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_events_infrastructure_driving_rest.apiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_events_infrastructure_driving_rest.apiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/day_sessions/{id}": {
+            "get": {
+                "description": "Gets a daysession from the specified Trip.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DaySession"
+                ],
+                "summary": "Gets a specfic Daysession by daysession id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "daysession ID",
+                        "name": "id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/day_session_application_dto.DaySessionDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/day_sessions/{id}/active-plan/{vid}": {
+            "put": {
+                "description": "updates the active plan of the day session.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DaySession"
+                ],
+                "summary": "Updates active plan",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Trip ID",
+                        "name": "x-d",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Planversion ID",
+                        "name": "x-vid",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/day_session_application_dto.DaySessionDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/day_sessions/{trip_id}": {
+            "get": {
+                "description": "List daysessions for the specified Trip.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DaySession"
+                ],
+                "summary": "List all the Daysessions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Trip ID",
+                        "name": "x-trip_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "DaySession details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_day_sessions_infrastructure_driving_rest.CreateDaySessionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/day_session_application_dto.DaySessionDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates daysessions for the specified Trip.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DaySession"
+                ],
+                "summary": "Create a Daysessions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Trip ID",
+                        "name": "x-trip_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "DaySession details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_day_sessions_infrastructure_driving_rest.CreateDaySessionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/day_session_application_dto.DaySessionDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/trips": {
             "get": {
                 "description": "List all the trips created with trip id.",
@@ -168,6 +501,55 @@
                 }
             }
         },
+        "day_session_application_dto.DaySessionDTO": {
+            "type": "object",
+            "properties": {
+                "createdAT": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "startLabel": {
+                    "type": "string"
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "tripID": {
+                    "type": "string"
+                }
+            }
+        },
+        "events_application_dto.EventsDTO": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "daySessionID": {
+                    "type": "string"
+                },
+                "eventType": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "payload": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "ts": {
+                    "type": "string"
+                }
+            }
+        },
         "internal_module_assistant_suggestions_infrastructure_driving_rest.CreateAssistantSuggestionRequest": {
             "type": "object",
             "properties": {
@@ -186,6 +568,81 @@
             }
         },
         "internal_module_assistant_suggestions_infrastructure_driving_rest.apiError": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "object",
+                    "properties": {
+                        "code": {
+                            "type": "string"
+                        },
+                        "message": {
+                            "type": "string"
+                        },
+                        "requestID": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "internal_module_day_sessions_infrastructure_driving_rest.CreateDaySessionRequest": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "description": "Date",
+                    "type": "string"
+                },
+                "start_label": {
+                    "description": "Starting Place",
+                    "type": "string"
+                },
+                "start_time": {
+                    "description": "Day session starting time",
+                    "type": "string"
+                },
+                "trip_id": {
+                    "description": "Trip id",
+                    "type": "string"
+                }
+            }
+        },
+        "internal_module_day_sessions_infrastructure_driving_rest.apiError": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "object",
+                    "properties": {
+                        "code": {
+                            "type": "string"
+                        },
+                        "message": {
+                            "type": "string"
+                        },
+                        "requestID": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "internal_module_events_infrastructure_driving_rest.CreateEventRequest": {
+            "type": "object",
+            "properties": {
+                "eventType": {
+                    "description": "Type of event (reached, delayed, skipped)",
+                    "type": "string"
+                },
+                "payload": {
+                    "description": "the stop id of the current event",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "internal_module_events_infrastructure_driving_rest.apiError": {
             "type": "object",
             "properties": {
                 "error": {

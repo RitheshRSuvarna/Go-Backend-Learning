@@ -12,6 +12,38 @@ definitions:
       status:
         type: string
     type: object
+  day_session_application_dto.DaySessionDTO:
+    properties:
+      createdAT:
+        type: string
+      date:
+        type: string
+      id:
+        type: string
+      startLabel:
+        type: string
+      startTime:
+        type: string
+      tripID:
+        type: string
+    type: object
+  events_application_dto.EventsDTO:
+    properties:
+      createdAt:
+        type: string
+      daySessionID:
+        type: string
+      eventType:
+        type: string
+      id:
+        type: string
+      payload:
+        items:
+          type: integer
+        type: array
+      ts:
+        type: string
+    type: object
   internal_module_assistant_suggestions_infrastructure_driving_rest.CreateAssistantSuggestionRequest:
     properties:
       day_session_id:
@@ -25,6 +57,56 @@ definitions:
         type: string
     type: object
   internal_module_assistant_suggestions_infrastructure_driving_rest.apiError:
+    properties:
+      error:
+        properties:
+          code:
+            type: string
+          message:
+            type: string
+          requestID:
+            type: string
+        type: object
+    type: object
+  internal_module_day_sessions_infrastructure_driving_rest.CreateDaySessionRequest:
+    properties:
+      date:
+        description: Date
+        type: string
+      start_label:
+        description: Starting Place
+        type: string
+      start_time:
+        description: Day session starting time
+        type: string
+      trip_id:
+        description: Trip id
+        type: string
+    type: object
+  internal_module_day_sessions_infrastructure_driving_rest.apiError:
+    properties:
+      error:
+        properties:
+          code:
+            type: string
+          message:
+            type: string
+          requestID:
+            type: string
+        type: object
+    type: object
+  internal_module_events_infrastructure_driving_rest.CreateEventRequest:
+    properties:
+      eventType:
+        description: Type of event (reached, delayed, skipped)
+        type: string
+      payload:
+        description: the stop id of the current event
+        items:
+          type: integer
+        type: array
+    type: object
+  internal_module_events_infrastructure_driving_rest.apiError:
     properties:
       error:
         properties:
@@ -85,6 +167,227 @@ info:
   title: Trip-Itinary API
   version: "1.0"
 paths:
+  /api/day-sessions/{id}/events:
+    get:
+      consumes:
+      - application/json
+      description: Gets all the events recorded.
+      parameters:
+      - description: Daysession ID
+        in: header
+        name: x-id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            items:
+              $ref: '#/definitions/events_application_dto.EventsDTO'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_module_events_infrastructure_driving_rest.apiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_module_events_infrastructure_driving_rest.apiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_module_events_infrastructure_driving_rest.apiError'
+      summary: Get Event
+      tags:
+      - Events
+    post:
+      consumes:
+      - application/json
+      description: Create events to track daysession.
+      parameters:
+      - description: Daysession ID
+        in: header
+        name: x-id
+        required: true
+        type: string
+      - description: Event details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_module_events_infrastructure_driving_rest.CreateEventRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/events_application_dto.EventsDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_module_events_infrastructure_driving_rest.apiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_module_events_infrastructure_driving_rest.apiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_module_events_infrastructure_driving_rest.apiError'
+      summary: Create an Event
+      tags:
+      - Events
+  /api/day_sessions/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Gets a daysession from the specified Trip.
+      parameters:
+      - description: daysession ID
+        in: header
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/day_session_application_dto.DaySessionDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError'
+      summary: Gets a specfic Daysession by daysession id
+      tags:
+      - DaySession
+  /api/day_sessions/{id}/active-plan/{vid}:
+    put:
+      consumes:
+      - application/json
+      description: updates the active plan of the day session.
+      parameters:
+      - description: Trip ID
+        in: header
+        name: x-d
+        required: true
+        type: string
+      - description: Planversion ID
+        in: header
+        name: x-vid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/day_session_application_dto.DaySessionDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError'
+      summary: Updates active plan
+      tags:
+      - DaySession
+  /api/day_sessions/{trip_id}:
+    get:
+      consumes:
+      - application/json
+      description: List daysessions for the specified Trip.
+      parameters:
+      - description: Trip ID
+        in: header
+        name: x-trip_id
+        required: true
+        type: string
+      - description: DaySession details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_module_day_sessions_infrastructure_driving_rest.CreateDaySessionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/day_session_application_dto.DaySessionDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError'
+      summary: List all the Daysessions
+      tags:
+      - DaySession
+    post:
+      consumes:
+      - application/json
+      description: Creates daysessions for the specified Trip.
+      parameters:
+      - description: Trip ID
+        in: header
+        name: x-trip_id
+        required: true
+        type: string
+      - description: DaySession details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_module_day_sessions_infrastructure_driving_rest.CreateDaySessionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/day_session_application_dto.DaySessionDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_module_day_sessions_infrastructure_driving_rest.apiError'
+      summary: Create a Daysessions
+      tags:
+      - DaySession
   /api/trips:
     get:
       description: List all the trips created with trip id.

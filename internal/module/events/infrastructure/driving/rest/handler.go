@@ -4,6 +4,7 @@ import (
 	"common"
 	"encoding/json"
 	"events/application/command"
+	_ "events/application/dto"
 	"events/application/services"
 	"net/http"
 )
@@ -45,12 +46,25 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 type CreateEventRequest struct {
 	// Type of event (reached, delayed, skipped)
-	EventType string          `json:"eventType"`
-	
+	EventType string `json:"eventType"`
+
 	// the stop id of the current event
-	Payload   json.RawMessage `json:"payload"`
+	Payload json.RawMessage `json:"payload"`
 }
 
+// CreateEvents godoc
+// @Summary Create an Event
+// @Description Create events to track daysession.
+// @Tags Events
+// @Accept json
+// @Produce json
+// @Param x-id header string true "Daysession ID"
+// @Param request body CreateEventRequest true "Event details"
+// @Success 201 {object} dto.EventsDTO
+// @Failure 400 {object} apiError
+// @Failure 404 {object} apiError
+// @Failure 500 {object} apiError
+// @Router /api/day-sessions/{id}/events [post]
 func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 	var req CreateEventRequest
 
@@ -76,6 +90,18 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(event)
 }
 
+// GetEvents godoc
+// @Summary Get Event
+// @Description Gets all the events recorded.
+// @Tags Events
+// @Accept json
+// @Produce json
+// @Param x-id header string true "Daysession ID"
+// @Success 201 {array} dto.EventsDTO
+// @Failure 400 {object} apiError
+// @Failure 404 {object} apiError
+// @Failure 500 {object} apiError
+// @Router /api/day-sessions/{id}/events [get]
 func (h *Handler) get(w http.ResponseWriter, r *http.Request) {
 	daysessionid := r.PathValue("id")
 
