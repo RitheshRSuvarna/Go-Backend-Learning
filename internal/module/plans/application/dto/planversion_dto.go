@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// PlanVersionDTO represents a plan version returned by the API.
 type PlanVersionDTO struct {
 	ID           string
 	DaysessionID string

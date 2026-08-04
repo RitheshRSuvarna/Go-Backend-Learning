@@ -71,9 +71,16 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type CreateDaySessionRequest struct {
+	// Trip id
 	TripID     string `json:"trip_id"`
+	
+	// Date
 	Date       string `json:"date"`
+	
+	// Day session starting time
 	StartTime  string `json:"start_time"`
+	
+	// Starting Place
 	StartLabel string `json:"start_label"`
 }
 

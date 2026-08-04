@@ -44,7 +44,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type CreateEventRequest struct {
+	// Type of event (reached, delayed, skipped)
 	EventType string          `json:"eventType"`
+	
+	// the stop id of the current event
 	Payload   json.RawMessage `json:"payload"`
 }
 

@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+
+// DaySessionDTO represents a day session returned by the API.
 type DaySessionDTO struct {
 	ID         string
 	TripID     string

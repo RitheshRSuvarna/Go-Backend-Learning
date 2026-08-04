@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+
+// AssistantSuggestionDTO represents a assistant suggestion returned by the API.
 type AssistantSuggestionsDTO struct {
 	ID           string
 	DaysessionID string

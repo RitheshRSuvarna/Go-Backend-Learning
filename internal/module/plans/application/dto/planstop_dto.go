@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+
+// PlanStopDTO represents a plan stops returned by the API.
 type PlanStopDTO struct {
 	PlanversionID    string
 	Position         int

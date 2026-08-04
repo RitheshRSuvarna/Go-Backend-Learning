@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+
+// EventDTO represents a event returned by the API.
 type EventsDTO struct {
 	ID           string
 	DaySessionID string

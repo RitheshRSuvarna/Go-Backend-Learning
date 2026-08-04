@@ -38,14 +38,31 @@ func (h *Handlers) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type CreatePlanStopRequest struct {
+	// Starting Place number
 	Position         int    `json:"position"`
+	
+	// Place name
 	Title            string `json:"title"`
+	
+	// Category of the Place
 	CategoryLabel    string `json:"categorylabel"`
+	
+	// Image URL of the Place
 	ImageURL         string `json:"imageurl"`
+	
+	// Arrival Time
 	PlannedArrival   string `json:"plannedarrival"`
+	
+	// Departure Time
 	PlannedDeparture string `json:"planneddeparture"`
+	
+	// Travel Time
 	TravelMinutes    int    `json:"travelminutes"`
+	
+	// Spendable time in the Place
 	StayMinutes      int    `json:"stayminutes"`
+	
+	// Busy Risk Label
 	BusyRiskLabel    string `json:"busyrisklabel"`
 }
 

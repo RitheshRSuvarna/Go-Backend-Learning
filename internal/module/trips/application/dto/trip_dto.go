@@ -5,6 +5,7 @@ import (
 	"trip/domain/entity"
 )
 
+// TripDTO represents a trip returned by the API.
 type TripDTO struct {
 	ID             string
 	Destination    string

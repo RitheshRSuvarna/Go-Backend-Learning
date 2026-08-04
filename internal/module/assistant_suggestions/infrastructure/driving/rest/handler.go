@@ -2,6 +2,7 @@ package rest
 
 import (
 	"assistant_suggestions/application/command"
+	_ "assistant_suggestions/application/dto"
 	"assistant_suggestions/application/services"
 	"common"
 	"encoding/json"
@@ -65,24 +66,28 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type CreateAssistantSuggestionRequest struct {
+	// Day session id
 	DaySessionID string `json:"day_session_id"`
-	Message      string `json:"message"`
-	Status       string `json:"status"`
+
+	// Message by the assistant
+	Message string `json:"message"`
+
+	// Status (pending, accepted, snoozed)
+	Status string `json:"status"`
 }
 
 // CreateAssistantSuggestion godoc
-//
 // @Summary Create an assistant suggestion
 // @Description Creates a new assistant suggestion for the specified day session.
-// @Tags Assistant Suggestions
+// @Tags Assistant_Suggestions
 // @Accept json
 // @Produce json
-// @Param id path string true "Day Session ID"
+// @Param id header string true "Day Session ID"
 // @Param request body CreateAssistantSuggestionRequest true "Assistant suggestion details"
-// @Success 201 {object} CreateAssistantSuggestionResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
+// @Success 201 {object} dto.AssistantSuggestionsDTO
+// @Failure 400 {object} apiError
+// @Failure 404 {object} apiError
+// @Failure 500 {object} apiError
 // @Router /day-sessions/{id}/assistant-suggestions [post]
 func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 	var req CreateAssistantSuggestionRequest

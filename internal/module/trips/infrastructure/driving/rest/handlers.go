@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"trip/application/command"
 	"trip/application/services"
+	_ "trip/application/dto"
 )
 
 type Handler struct {
@@ -37,12 +38,31 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type CreateTripRequest struct {
-	Destination    string `json:"destination"`
-	StartDate      string `json:"start_date"`
-	EndDate        string `json:"end_date"`
-	TravelersCount int    `json:"travelers_count"`
+	// Destination city
+	Destination string `json:"destination"`
+
+	// Start Date
+	StartDate string `json:"start_date"`
+
+	// End Date
+	EndDate string `json:"end_date"`
+
+	// Number of Travelers
+	TravelersCount int `json:"travelers_count"`
 }
 
+// CreateTrips godoc
+// @Summary Create a Trip
+// @Description Creates a new trip for the specified destination and dates.
+// @Tags Trip
+// @Accept json
+// @Produce json
+// @Param request body CreateTripRequest true "Trip details"
+// @Success 201 {object} dto.TripDTO
+// @Failure 400 {object} apiError
+// @Failure 404 {object} apiError
+// @Failure 500 {object} apiError
+// @Router /api/trips [post]
 func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 	var req CreateTripRequest
 
@@ -67,6 +87,14 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(trip)
 }
 
+// ListTrips godoc
+// @Summary List all the Trips
+// @Description List all the trips created with trip id.
+// @Tags Trip
+// @Produce json
+// @Success 200 {array} dto.Tripdto
+// @Failure 500 {object} ErrorResponse
+// @Router /api/trips [get]
 func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
 	trips, err := h.listTrips.ListTrips(r.Context())
 	if err != nil {

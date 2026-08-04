@@ -28,12 +28,6 @@ func NewHandler(createpv *services.CreatePlanVersionService, getpln *services.Ge
 	}
 }
 
-// func NewActivePlanHandler(getpv *services.GetByIDPlanVersionService) *ActivePlanHandler {
-// 	return &ActivePlanHandler{
-
-// 	}
-// }
-
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("=== PlanVersion ServeHTTP ===", r.Method, r.URL.Path)
 
@@ -90,7 +84,11 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type CreatePlanVersionRequest struct {
+
+	// Version number
 	Version int    `json:"version"`
+	
+	// Note
 	Note    string `json:"note"`
 }
 
