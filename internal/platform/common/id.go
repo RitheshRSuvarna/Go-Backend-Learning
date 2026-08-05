@@ -117,6 +117,48 @@ func GenerateEventID() EventsID {
 	return EventsID(GenerateID())
 }
 
+type UserID ID
+
+func NewUseID(value string) (UserID, error) {
+	id, err := NewID(value)
+	if err != nil {
+		return UserID{}, err
+	}
+	return UserID(id), err
+}
+
+func GenerateUserID() UserID {
+	return UserID(GenerateID())
+}
+
+type SessionID ID
+
+func NewSessionID(value string) (SessionID, error) {
+	id, err := NewID(value)
+	if err != nil {
+		return SessionID{}, err
+	}
+	return SessionID(id), err
+}
+
+func GenerateSessionID() SessionID {
+	return SessionID(GenerateID())
+}
+
+type PasswordResetID ID
+
+func NewPasswordReset(value string) (PasswordResetID, error) {
+	id, err := NewID(value)
+	if err != nil {
+		return PasswordResetID{}, err
+	}
+	return PasswordResetID(id), err
+}
+
+func GeneratePasswordReset() PasswordResetID {
+	return PasswordResetID(GenerateID())
+}
+
 func (id TripID) String() string { return ID(id).String() }
 func (id TripID) Value() string  { return ID(id).Value() }
 func (id TripID) IsZero() bool   { return ID(id).IsZero() }
@@ -140,3 +182,15 @@ func (id AssistantSuggestionsID) IsZero() bool   { return ID(id).IsZero() }
 func (id EventsID) String() string { return ID(id).String() }
 func (id EventsID) Value() string  { return ID(id).Value() }
 func (id EventsID) IsZero() bool   { return ID(id).IsZero() }
+
+func (id UserID) String() string { return ID(id).String() }
+func (id UserID) Value() string  { return ID(id).Value() }
+func (id UserID) IsZero() bool   { return ID(id).IsZero() }
+
+func (id SessionID) String() string { return ID(id).String() }
+func (id SessionID) Value() string  { return ID(id).Value() }
+func (id SessionID) IsZero() bool   { return ID(id).IsZero() }
+
+func (id PasswordResetID) String() string { return ID(id).String() }
+func (id PasswordResetID) Value() string  { return ID(id).Value() }
+func (id PasswordResetID) IsZero() bool   { return ID(id).IsZero() }
