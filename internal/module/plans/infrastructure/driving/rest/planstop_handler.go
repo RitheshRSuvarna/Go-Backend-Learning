@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"plans/application/command"
+	_ "plans/application/dto"
 	"plans/application/services"
 	"time"
 )
@@ -39,33 +40,46 @@ func (h *Handlers) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 type CreatePlanStopRequest struct {
 	// Starting Place number
-	Position         int    `json:"position"`
-	
+	Position int `json:"position"`
+
 	// Place name
-	Title            string `json:"title"`
-	
+	Title string `json:"title"`
+
 	// Category of the Place
-	CategoryLabel    string `json:"categorylabel"`
-	
+	CategoryLabel string `json:"categorylabel"`
+
 	// Image URL of the Place
-	ImageURL         string `json:"imageurl"`
-	
+	ImageURL string `json:"imageurl"`
+
 	// Arrival Time
-	PlannedArrival   string `json:"plannedarrival"`
-	
+	PlannedArrival string `json:"plannedarrival"`
+
 	// Departure Time
 	PlannedDeparture string `json:"planneddeparture"`
-	
+
 	// Travel Time
-	TravelMinutes    int    `json:"travelminutes"`
-	
+	TravelMinutes int `json:"travelminutes"`
+
 	// Spendable time in the Place
-	StayMinutes      int    `json:"stayminutes"`
-	
+	StayMinutes int `json:"stayminutes"`
+
 	// Busy Risk Label
-	BusyRiskLabel    string `json:"busyrisklabel"`
+	BusyRiskLabel string `json:"busyrisklabel"`
 }
 
+// CreatePlanStop godoc
+// @Summary Creates PlanStop
+// @Description Creates planstopd for each planversion
+// @Tags Plan
+// @Accept json
+// @Produce json
+// @Param id header string true "PlanVersion ID"
+// @Param request body CreatePlanStopRequest true "PlanStop details"
+// @Success 201 {object} dto.PlanStopDTO
+// @Failure 400 {object} apiError
+// @Failure 404 {object} apiError
+// @Failure 500 {object} apiError
+// @Router /api/day_sessions/{id}/stop [post]
 func (h *Handlers) create(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(">>> ENTERED PLAN STOP CREATE")
 	fmt.Println("===== PLAN STOP CREATE HANDLER =====")
@@ -123,6 +137,18 @@ func (h *Handlers) create(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(planstop)
 }
 
+// ListPlanStop godoc
+// @Summary List Plan Stops
+// @Description Lists all the planstops under a plan version
+// @Tags Plan
+// @Accept json
+// @Produce json
+// @Param id header string true "daysession ID"
+// @Success 201 {object} dto.PlanStopDTO
+// @Failure 400 {object} apiError
+// @Failure 404 {object} apiError
+// @Failure 500 {object} apiError
+// @Router /api/day_sessions/{id}/stop [get]
 func (h *Handlers) listPlanstop(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 

@@ -56,6 +56,15 @@ definitions:
         description: Status (pending, accepted, snoozed)
         type: string
     type: object
+  internal_module_assistant_suggestions_infrastructure_driving_rest.EditAssistantSuggestionRequest:
+    properties:
+      message:
+        description: Edited Message
+        type: string
+      status:
+        description: Edited Status
+        type: string
+    type: object
   internal_module_assistant_suggestions_infrastructure_driving_rest.apiError:
     properties:
       error:
@@ -118,6 +127,57 @@ definitions:
             type: string
         type: object
     type: object
+  internal_module_plans_infrastructure_driving_rest.CreatePlanStopRequest:
+    properties:
+      busyrisklabel:
+        description: Busy Risk Label
+        type: string
+      categorylabel:
+        description: Category of the Place
+        type: string
+      imageurl:
+        description: Image URL of the Place
+        type: string
+      plannedarrival:
+        description: Arrival Time
+        type: string
+      planneddeparture:
+        description: Departure Time
+        type: string
+      position:
+        description: Starting Place number
+        type: integer
+      stayminutes:
+        description: Spendable time in the Place
+        type: integer
+      title:
+        description: Place name
+        type: string
+      travelminutes:
+        description: Travel Time
+        type: integer
+    type: object
+  internal_module_plans_infrastructure_driving_rest.CreatePlanVersionRequest:
+    properties:
+      note:
+        description: Note
+        type: string
+      version:
+        description: Version number
+        type: integer
+    type: object
+  internal_module_plans_infrastructure_driving_rest.apiError:
+    properties:
+      error:
+        properties:
+          code:
+            type: string
+          message:
+            type: string
+          requestID:
+            type: string
+        type: object
+    type: object
   internal_module_trips_infrastructure_driving_rest.CreateTripRequest:
     properties:
       destination:
@@ -144,6 +204,44 @@ definitions:
           requestID:
             type: string
         type: object
+    type: object
+  plans_application_dto.PlanStopDTO:
+    properties:
+      busyRiskLabel:
+        type: string
+      categoryLabel:
+        type: string
+      createdAt:
+        type: string
+      imageURL:
+        type: string
+      plannedArrival:
+        type: string
+      plannedDeparture:
+        type: string
+      planversionID:
+        type: string
+      position:
+        type: integer
+      stayMinutes:
+        type: integer
+      title:
+        type: string
+      travelMinutes:
+        type: integer
+    type: object
+  plans_application_dto.PlanVersionDTO:
+    properties:
+      createdAt:
+        type: string
+      daysessionID:
+        type: string
+      id:
+        type: string
+      note:
+        type: string
+      version:
+        type: integer
     type: object
   trip_application_dto.TripDTO:
     properties:
@@ -311,6 +409,147 @@ paths:
       summary: Updates active plan
       tags:
       - DaySession
+  /api/day_sessions/{id}/plan-versions:
+    get:
+      consumes:
+      - application/json
+      description: Create planversions for a daysessions
+      parameters:
+      - description: daysession ID
+        in: header
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/plans_application_dto.PlanVersionDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_module_plans_infrastructure_driving_rest.apiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_module_plans_infrastructure_driving_rest.apiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_module_plans_infrastructure_driving_rest.apiError'
+      summary: Create Plan Version
+      tags:
+      - Plan
+    post:
+      consumes:
+      - application/json
+      description: Create planversions for a daysessions
+      parameters:
+      - description: daysession ID
+        in: header
+        name: id
+        required: true
+        type: string
+      - description: daysession ID
+        in: header
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/plans_application_dto.PlanVersionDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_module_plans_infrastructure_driving_rest.apiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_module_plans_infrastructure_driving_rest.apiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_module_plans_infrastructure_driving_rest.apiError'
+      summary: Create Plan Version
+      tags:
+      - Plan
+  /api/day_sessions/{id}/stop:
+    get:
+      consumes:
+      - application/json
+      description: Lists all the planstops under a plan version
+      parameters:
+      - description: daysession ID
+        in: header
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/plans_application_dto.PlanStopDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_module_plans_infrastructure_driving_rest.apiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_module_plans_infrastructure_driving_rest.apiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_module_plans_infrastructure_driving_rest.apiError'
+      summary: List Plan Stops
+      tags:
+      - Plan
+    post:
+      consumes:
+      - application/json
+      description: Creates planstopd for each planversion
+      parameters:
+      - description: PlanVersion ID
+        in: header
+        name: id
+        required: true
+        type: string
+      - description: PlanStop details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_module_plans_infrastructure_driving_rest.CreatePlanStopRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/plans_application_dto.PlanStopDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_module_plans_infrastructure_driving_rest.apiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_module_plans_infrastructure_driving_rest.apiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_module_plans_infrastructure_driving_rest.apiError'
+      summary: Creates PlanStop
+      tags:
+      - Plan
   /api/day_sessions/{trip_id}:
     get:
       consumes:
@@ -441,6 +680,38 @@ paths:
       tags:
       - Trip
   /day-sessions/{id}/assistant-suggestions:
+    get:
+      consumes:
+      - application/json
+      description: Get all the assistant suggestions
+      parameters:
+      - description: Day Session ID
+        in: header
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/assistant_suggestions_application_dto.AssistantSuggestionsDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_module_assistant_suggestions_infrastructure_driving_rest.apiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_module_assistant_suggestions_infrastructure_driving_rest.apiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_module_assistant_suggestions_infrastructure_driving_rest.apiError'
+      summary: Get assistant suggestions
+      tags:
+      - Assistant_Suggestions
     post:
       consumes:
       - application/json
@@ -477,6 +748,45 @@ paths:
           schema:
             $ref: '#/definitions/internal_module_assistant_suggestions_infrastructure_driving_rest.apiError'
       summary: Create an assistant suggestion
+      tags:
+      - Assistant_Suggestions
+  /day-sessions/assistant-suggestions/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Edit assistant suggestion for the specified day session.
+      parameters:
+      - description: Day Session ID
+        in: header
+        name: id
+        required: true
+        type: string
+      - description: Edit Assistant suggestion details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_module_assistant_suggestions_infrastructure_driving_rest.EditAssistantSuggestionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/assistant_suggestions_application_dto.AssistantSuggestionsDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_module_assistant_suggestions_infrastructure_driving_rest.apiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_module_assistant_suggestions_infrastructure_driving_rest.apiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_module_assistant_suggestions_infrastructure_driving_rest.apiError'
+      summary: Edit assistant suggestion
       tags:
       - Assistant_Suggestions
 swagger: "2.0"

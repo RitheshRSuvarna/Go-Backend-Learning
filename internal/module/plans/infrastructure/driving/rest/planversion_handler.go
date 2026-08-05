@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"plans/application/command"
 	"plans/application/services"
+	_ "plans/application/dto"
 	"strings"
 )
 
@@ -86,12 +87,25 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 type CreatePlanVersionRequest struct {
 
 	// Version number
-	Version int    `json:"version"`
-	
+	Version int `json:"version"`
+
 	// Note
-	Note    string `json:"note"`
+	Note string `json:"note"`
 }
 
+// CreatePlanVersion godoc
+// @Summary Create Plan Version
+// @Description Create planversions for a daysessions
+// @Tags Plan
+// @Accept json
+// @Produce json
+// @Param id header string true "daysession ID"
+// @Param id header string true "daysession ID"
+// @Success 201 {object} dto.PlanVersionDTO
+// @Failure 400 {object} apiError
+// @Failure 404 {object} apiError
+// @Failure 500 {object} apiError
+// @Router /api/day_sessions/{id}/plan-versions [post]
 func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("PlanVersion create handler called")
 	var req CreatePlanVersionRequest
@@ -129,6 +143,19 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(planversion)
 }
 
+// CreatePlanVersion godoc
+// @Summary Create Plan Version
+// @Description Create planversions for a daysessions
+// @Tags Plan
+// @Accept json
+// @Produce json
+// @Param id header string true "daysession ID"
+// @Param request body CreatePlanVersionRequest true "PlanVersion details"
+// @Success 201 {object} dto.PlanVersionDTO
+// @Failure 400 {object} apiError
+// @Failure 404 {object} apiError
+// @Failure 500 {object} apiError
+// @Router /api/day_sessions/{id}/plan-versions [get]
 func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
@@ -154,6 +181,18 @@ func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// CreatePlanVersion godoc
+// @Summary Create Plan Version
+// @Description Create planversions for a daysessions
+// @Tags Plan
+// @Accept json
+// @Produce json
+// @Param id header string true "daysession ID"
+// @Success 201 {object} dto.PlanVersionDTO
+// @Failure 400 {object} apiError
+// @Failure 404 {object} apiError
+// @Failure 500 {object} apiError
+// @Router /api/day_sessions/{id}/plan-versions [get]
 func (h *Handler) getactiveplan(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 

@@ -116,6 +116,18 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(assistantsuggestion)
 }
 
+// GetAssistantSuggestion godoc
+// @Summary Get assistant suggestions
+// @Description Get all the assistant suggestions
+// @Tags Assistant_Suggestions
+// @Accept json
+// @Produce json
+// @Param id header string true "Day Session ID"
+// @Success 201 {object} dto.AssistantSuggestionsDTO
+// @Failure 400 {object} apiError
+// @Failure 404 {object} apiError
+// @Failure 500 {object} apiError
+// @Router /day-sessions/{id}/assistant-suggestions [get]
 func (h *Handler) get(w http.ResponseWriter, r *http.Request) {
 	daysessionid := r.PathValue("id")
 
@@ -140,10 +152,26 @@ func (h *Handler) get(w http.ResponseWriter, r *http.Request) {
 }
 
 type EditAssistantSuggestionRequest struct {
+	// Edited Message
 	Message string `json:"message"`
-	Status  string `json:"status"`
+
+	// Edited Status
+	Status string `json:"status"`
 }
 
+// EditAssistantSuggestion godoc
+// @Summary Edit assistant suggestion
+// @Description Edit assistant suggestion for the specified day session.
+// @Tags Assistant_Suggestions
+// @Accept json
+// @Produce json
+// @Param id header string true "Day Session ID"
+// @Param request body EditAssistantSuggestionRequest true "Edit Assistant suggestion details"
+// @Success 201 {object} dto.AssistantSuggestionsDTO
+// @Failure 400 {object} apiError
+// @Failure 404 {object} apiError
+// @Failure 500 {object} apiError
+// @Router /day-sessions/assistant-suggestions/{id} [put]
 func (h *Handler) edit(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
