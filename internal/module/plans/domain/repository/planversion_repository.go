@@ -12,3 +12,4 @@ type PlanVersionRepository interface {
 	GetByID(ctx context.Context, id common.PlanVersionID) (*entity.PlanVersion, error)
 	ListPlanVersion(ctx context.Context, id common.DaySessionID) ([]*entity.PlanVersion, error)
 }
+						
