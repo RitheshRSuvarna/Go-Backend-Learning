@@ -2,55 +2,32 @@ package llmclient
 
 import (
 	"fmt"
-	"time"
+	"regexp"
 )
 
-func ValidateTime(value string) error {
-	_, err := time.Parse("15:04", value)
-	if err != nil {
-		return fmt.Errorf("invalid time format: %s", value)
-	}
-	return nil
-}
+var hhmmPattern = regexp.MustCompile(`^(?:[01]\d|2[0-3]):[0-5]\d$`)
 
 func ValidateStop(stop Stop) error {
+	if stop.Position <= 0 {
+		return fmt.Errorf("position must be greater than zero")
+	}
 	if stop.Title == "" {
 		return fmt.Errorf("title is required")
 	}
-
 	if stop.CategoryLabel == "" {
 		return fmt.Errorf("category_label is required")
 	}
-
-	if stop.PlannedArrival == "" {
-		return fmt.Errorf("planned_arrival is required")
+	if stop.PlannedArrival == "" || !hhmmPattern.MatchString(stop.PlannedArrival) {
+		return fmt.Errorf("planned_arrival must use HH:MM format")
 	}
-
-	if stop.PlannedDeparture == "" {
-		return fmt.Errorf("planned_departure is required")
+	if stop.PlannedDeparture == "" || !hhmmPattern.MatchString(stop.PlannedDeparture) {
+		return fmt.Errorf("planned_departure must use HH:MM format")
 	}
-
-	if err := ValidateTime(stop.PlannedArrival); err != nil {
-		return err
+	if stop.TravelMinutes < 0 {
+		return fmt.Errorf("travel_minutes must not be negative")
 	}
-
-	if err := ValidateTime(stop.PlannedDeparture); err != nil {
-		return err
+	if stop.StayMinutes <= 0 {
+		return fmt.Errorf("stay_minutes must be greater than zero")
 	}
-
-	return nil
-}
-
-func ValidatePlan(resp PlanResponse) error {
-	if len(resp.Stops) == 0 {
-		return fmt.Errorf("plan contains no stops")
-	}
-
-	for _, stop := range resp.Stops {
-		if err := ValidateStop(stop); err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
