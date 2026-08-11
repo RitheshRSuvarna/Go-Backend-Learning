@@ -75,9 +75,9 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type CreateDaySessionRequest struct {
-	TripID    string `json:"trip_id"`
-	Date      string `json:"date"`
-	StartTime string `json:"start_time"`
+	TripID     string `json:"trip_id"`
+	Date       string `json:"date"`
+	StartTime  string `json:"start_time"`
 	StartLabel string `json:"start_label"`
 }
 
@@ -126,7 +126,7 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Param id path string true "Day session ID"
-// @Success 200 {object} port.PlanResponse
+// @Success 200 {object} map[string]any
 // @Failure 400 {object} apiError
 // @Failure 502 {object} apiError
 // @Failure 504 {object} apiError
