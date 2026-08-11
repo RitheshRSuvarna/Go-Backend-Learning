@@ -8,21 +8,24 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 type Handler struct {
-	createDaysession *services.CreateDaySessionService
-	getDaysession    *services.GetDaySessionService
-	listDaysession   *services.ListDaySessionService
-	setActivePlan    *services.SetActivePlanService
+	createDaysession       *services.CreateDaySessionService
+	getDaysession          *services.GetDaySessionService
+	listDaysession         *services.ListDaySessionService
+	setActivePlan          *services.SetActivePlanService
+	generateLLMPlanService *services.GenerateLLMPlanService
 }
 
-func NewHandler(createds *services.CreateDaySessionService, getds *services.GetDaySessionService, listds *services.ListDaySessionService, updtactpln *services.SetActivePlanService) *Handler {
+func NewHandler(createds *services.CreateDaySessionService, getds *services.GetDaySessionService, listds *services.ListDaySessionService, updtactpln *services.SetActivePlanService, generateLLMPlanSvc *services.GenerateLLMPlanService) *Handler {
 	return &Handler{
-		createDaysession: createds,
-		getDaysession:    getds,
-		listDaysession:   listds,
-		setActivePlan:    updtactpln,
+		createDaysession:       createds,
+		getDaysession:          getds,
+		listDaysession:         listds,
+		setActivePlan:          updtactpln,
+		generateLLMPlanService: generateLLMPlanSvc,
 	}
 }
 
@@ -30,8 +33,12 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("=== DAY SESSION ServeHTTP ===", r.Method, r.URL.Path)
 
 	switch r.Method {
-
 	case http.MethodPost:
+		if r.PathValue("id") != "" && strings.HasSuffix(r.URL.Path, "/llm/plan") {
+			h.generateLLMPlan(w, r)
+			return
+		}
+
 		if tripID := r.PathValue("trip_id"); tripID != "" {
 			h.create(w, r)
 			return
@@ -40,14 +47,11 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeError(w, r, http.StatusNotFound, "not_found", "not found")
 
 	case http.MethodGet:
-
-		// GET /day-sessions/{id}
 		if id := r.PathValue("trip_id"); id != "" {
 			h.list(w, r)
 			return
 		}
 
-		// GET /day-sessions?trip_id=...&date=...
 		if id := r.PathValue("id"); id != "" {
 			h.getdaysession(w, r)
 			return
@@ -56,7 +60,6 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeError(w, r, http.StatusNotFound, "not_found", "not found")
 
 	case http.MethodPut:
-
 		daySessionID := r.PathValue("id")
 		planVersionID := r.PathValue("planVersionId")
 
@@ -72,16 +75,9 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type CreateDaySessionRequest struct {
-	// Trip id
-	TripID string `json:"trip_id"`
-
-	// Date
-	Date string `json:"date"`
-
-	// Day session starting time
+	TripID    string `json:"trip_id"`
+	Date      string `json:"date"`
 	StartTime string `json:"start_time"`
-
-	// Starting Place
 	StartLabel string `json:"start_label"`
 }
 
@@ -99,16 +95,13 @@ type CreateDaySessionRequest struct {
 // @Failure 500 {object} apiError
 // @Router /api/day_sessions/{trip_id} [post]
 func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("===== DAY SESSION CREATE HANDLER =====")
 	tripid := r.PathValue("trip_id")
 	var req CreateDaySessionRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		fmt.Println("Decode error:", err)
 		writeError(w, r, http.StatusBadRequest, "bad_request", "invalid json body")
 		return
 	}
-	fmt.Printf("%+v\n", req)
 
 	daysession, err := h.createDaysession.CreateDaySession(r.Context(), command.CreateDaySessionCommand{
 		TripID:     tripid,
@@ -126,6 +119,36 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(daysession)
 }
 
+// GenerateLLMPlan godoc
+// @Summary Generate a day-session plan using the LLM service
+// @Description Calls the deterministic LLM contract service to generate a plan for the day session.
+// @Tags DaySession
+// @Accept json
+// @Produce json
+// @Param id path string true "Day session ID"
+// @Success 200 {object} port.PlanResponse
+// @Failure 400 {object} apiError
+// @Failure 502 {object} apiError
+// @Failure 504 {object} apiError
+// @Router /api/day-sessions/{id}/llm/plan [post]
+func (h *Handler) generateLLMPlan(w http.ResponseWriter, r *http.Request) {
+	daySessionID := r.PathValue("id")
+	if _, err := common.NewDaySessionID(daySessionID); err != nil {
+		writeDomainError(w, r, err)
+		return
+	}
+
+	plan, err := h.generateLLMPlanService.GeneratePlan(r.Context(), daySessionID)
+	if err != nil {
+		writeError(w, r, http.StatusBadGateway, "llm_error", err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(plan)
+}
+
 // GetDaySessions godoc
 // @Summary Gets a specfic Daysession by daysession id
 // @Description Gets a daysession from the specified Trip.
@@ -139,7 +162,6 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} apiError
 // @Router /api/day_sessions/{id} [get]
 func (h *Handler) getdaysession(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("===== ENTERED getdaysession HANDLER =====")
 	daysessionID := r.PathValue("id")
 
 	domaindaysessionID, err := common.NewDaySessionID(daysessionID)
@@ -147,27 +169,16 @@ func (h *Handler) getdaysession(w http.ResponseWriter, r *http.Request) {
 		writeDomainError(w, r, err)
 		return
 	}
-	fmt.Println("1. DONE")
 
-	daySession, err := h.getDaysession.GetDaySession(
-		r.Context(),
-		domaindaysessionID,
-	)
-	fmt.Printf("result = %+v\n", daySession)
-	fmt.Printf("err = %v\n", err)
+	daySession, err := h.getDaysession.GetDaySession(r.Context(), domaindaysessionID)
 	if err != nil {
 		writeDomainError(w, r, err)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-
 	if err := json.NewEncoder(w).Encode(daySession); err != nil {
-		http.Error(
-			w,
-			err.Error(),
-			http.StatusInternalServerError,
-		)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
@@ -193,18 +204,13 @@ func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	daySession, err := h.listDaysession.ListDaysession(
-		r.Context(),
-		tripID,
-	)
+	daySession, err := h.listDaysession.ListDaysession(r.Context(), tripID)
 	if err != nil {
-		fmt.Println("List Handler Error:", err)
 		writeDomainError(w, r, err)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-
 	if err := json.NewEncoder(w).Encode(daySession); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -223,27 +229,21 @@ func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
 // @Failure 404 {object} apiError
 // @Failure 500 {object} apiError
 // @Router /api/day_sessions/{id}/active-plan/{vid} [put]
-func (h *Handler) updateActivePlan(
-	w http.ResponseWriter,
-	r *http.Request,
-	daySessionID string,
-	planVersionID string,
-) {
+func (h *Handler) updateActivePlan(w http.ResponseWriter, r *http.Request, daySessionID string, planVersionID string) {
 	dsID, err := common.NewDaySessionID(daySessionID)
 	if err != nil {
-		// handle error
+		writeDomainError(w, r, err)
 		return
 	}
 
 	pvID, err := common.NewPlanVersionID(planVersionID)
 	if err != nil {
-		// handle error
+		writeDomainError(w, r, err)
 		return
 	}
 
-	err = h.setActivePlan.UpdateActivePlan(r.Context(), dsID, pvID)
-	if err != nil {
-		// handle error
+	if err := h.setActivePlan.UpdateActivePlan(r.Context(), dsID, pvID); err != nil {
+		writeDomainError(w, r, err)
 		return
 	}
 
