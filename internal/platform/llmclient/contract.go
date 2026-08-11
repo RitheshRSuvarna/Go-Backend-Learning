@@ -46,3 +46,21 @@ func (r PlanResponse) Validate() error {
 	}
 	return nil
 }
+
+type ReplanRequest struct {
+	DaySessionID string `json:"day_session_id"`
+}
+
+func (r ReplanRequest) Validate() error {
+	if r.DaySessionID == "" {
+		return fmt.Errorf("day_session_id is required")
+	}
+	if _, err := uuid.Parse(r.DaySessionID); err != nil {
+		return fmt.Errorf("day_session_id must be a valid UUID: %w", err)
+	}
+	return nil
+}
+
+type ReplanResponse struct {
+	Stops []Stop `json:"stops"`
+}
