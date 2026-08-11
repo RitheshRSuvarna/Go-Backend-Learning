@@ -1,16 +1,23 @@
 package llmclient
 
-type DaySessionRequest struct {
-    Destination string `json:"destination"`
-    StartDate   string `json:"start_date"`
-    EndDate     string `json:"end_date"`
-    Travelers   int    `json:"travelers"`
+import (
+	"fmt"
+
+	"github.com/google/uuid"
+)
+
+type PlanRequest struct {
+	DaySessionID string `json:"day_session_id"`
 }
 
-type GeneratedDaySession struct {
-    Date       string `json:"date"`
-    StartTime  string `json:"start_time"`
-    StartLabel string `json:"start_label"`
+func (r PlanRequest) Validate() error {
+	if r.DaySessionID == "" {
+		return fmt.Errorf("day_session_id is required")
+	}
+	if _, err := uuid.Parse(r.DaySessionID); err != nil {
+		return fmt.Errorf("day_session_id must be a valid UUID: %w", err)
+	}
+	return nil
 }
 
 type Stop struct {
@@ -28,6 +35,14 @@ type PlanResponse struct {
 	Stops []Stop `json:"stops"`
 }
 
-type ReplanResponse struct {
-	Stops []Stop `json:"stops"`
+func (r PlanResponse) Validate() error {
+	if len(r.Stops) == 0 {
+		return fmt.Errorf("stops must contain at least one item")
+	}
+	for i, stop := range r.Stops {
+		if err := ValidateStop(stop); err != nil {
+			return fmt.Errorf("stops[%d]: %w", i, err)
+		}
+	}
+	return nil
 }
