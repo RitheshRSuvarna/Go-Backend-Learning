@@ -9,32 +9,33 @@ import (
 	"os"
 	"time"
 
-		assistantsuggservice "assistant_suggestions/application/services"
-		assistantsuggrepository "assistant_suggestions/infrastructure/driven/postgres/repository"
-		assistantsuggrest "assistant_suggestions/infrastructure/driving/rest"
-		daysessionservice "day_session/application/services"
-		daysessionrepository "day_session/infrastructure/driven/postgres/repository"
-		daysessionrest "day_session/infrastructure/driving/rest"
-		eventservice "events/application/services"
-		eventrepository "events/infrastructure/driven/postgres/repository"
-		eventrest "events/infrastructure/driving/rest"
-		planservice "plans/application/services"
-		planrepository "plans/infrastructure/driven/postgres/repository"
-		planstoprest "plans/infrastructure/driving/rest"
-		planversionrest "plans/infrastructure/driving/rest"
-		platformpostgres "postgres"
-		tripservice "trip/application/services"
-		triprepository "trip/infrastructure/driven/postgres/repository"
-		triprest "trip/infrastructure/driving/rest"
+	assistantsuggservice "assistant_suggestions/application/services"
+	assistantsuggrepository "assistant_suggestions/infrastructure/driven/postgres/repository"
+	assistantsuggrest "assistant_suggestions/infrastructure/driving/rest"
+	daysessionservice "day_session/application/services"
+	day_sessionai "day_session/infrastructure/driven/ai"
+	daysessionrepository "day_session/infrastructure/driven/postgres/repository"
+	daysessionrest "day_session/infrastructure/driving/rest"
+	eventservice "events/application/services"
+	eventrepository "events/infrastructure/driven/postgres/repository"
+	eventrest "events/infrastructure/driving/rest"
+	"llmclient"
+	planservice "plans/application/services"
+	planrepository "plans/infrastructure/driven/postgres/repository"
+	planstoprest "plans/infrastructure/driving/rest"
+	planversionrest "plans/infrastructure/driving/rest"
+	platformpostgres "postgres"
+	tripservice "trip/application/services"
+	triprepository "trip/infrastructure/driven/postgres/repository"
+	triprest "trip/infrastructure/driving/rest"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/joho/godotenv"
 	"github.com/pressly/goose/v3"
 
-	_ "api/internal/swaggerdoc" // swagger docs
-
-	httpSwagger "github.com/swaggo/http-swagger" // http-swagger middleware
+	_ "api/internal/swaggerdoc"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 //	@title			Trip-Itinary API
@@ -59,18 +60,44 @@ func main() {
 	}
 
 	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	llmBaseURL := os.Getenv("LLM_BASE_URL")
+	if llmBaseURL == "" {
+		llmBaseURL = "http://localhost:8000"
+	}
+
+	llmTimeout := 10 * time.Second
+	if raw := os.Getenv("LLM_TIMEOUT"); raw != "" {
+		parsed, err := time.ParseDuration(raw)
+		if err != nil {
+			log.Fatalf("invalid LLM_TIMEOUT: %v", err)
+		}
+		llmTimeout = parsed
+	}
+
+	llmClient, err := llmclient.NewClient(llmclient.Config{
+		BaseURL: llmBaseURL,
+		Timeout: llmTimeout,
+	})
+	if err != nil {
+		log.Fatalf("llm client: %v", err)
+	}
 
 	mux := http.NewServeMux()
 
 	mux.Handle("/swagger/", httpSwagger.WrapHandler)
 	mux.Handle("/api/trips", http.StripPrefix("/api", initTripHandler(db)))
-	mux.Handle("/api/day-sessions/{trip_id}", http.StripPrefix("/api", initDaySessionHandler(db)))
-	mux.Handle("/api/day-session/{id}", http.StripPrefix("/api", initDaySessionHandler(db)))
+	mux.Handle("/api/day-sessions/{trip_id}", http.StripPrefix("/api", initDaySessionHandler(db, llmClient)))
+	mux.Handle("/api/day-session/{id}", http.StripPrefix("/api", initDaySessionHandler(db, llmClient)))
+	mux.Handle("/api/day-sessions/{id}/llm/plan", http.StripPrefix("/api", initDaySessionHandler(db, llmClient)))
 	mux.Handle("/api/day-sessions/{id}/plan-versions", http.StripPrefix("/api", initPlanVersionHandler(db)))
 	mux.Handle("/api/day-sessions/{id}/stop", http.StripPrefix("/api", initPlanStopHandler(db)))
 	mux.Handle("/api/day-sessions/{id}/active-plan", http.StripPrefix("/api", initPlanVersionHandler(db)))
 	mux.Handle("/api/day-sessions/{id}/suggestions", http.StripPrefix("/api", initAssistantSuggestionHandler(db)))
-	mux.Handle("/api/day-sessions/{id}/active-plan/{vid}", http.StripPrefix("/api", initDaySessionHandler(db)))
+	mux.Handle("/api/day-sessions/{id}/active-plan/{vid}", http.StripPrefix("/api", initDaySessionHandler(db, llmClient)))
 	mux.Handle("/api/assistant-suggestions/{id}", http.StripPrefix("/api", initAssistantSuggestionHandler(db)))
 	mux.Handle("/api/day-sessions/{id}/events", http.StripPrefix("/api", initEventsHandler(db)))
 
@@ -78,7 +105,6 @@ func main() {
 
 	log.Printf("Trips API: http://localhost:%s/api", port)
 	log.Fatal(http.ListenAndServe(":"+port, mux))
-
 }
 
 func loadEnv() {
@@ -91,7 +117,6 @@ func loadEnv() {
 }
 
 func Run(ctx context.Context, pool *pgxpool.Pool) error {
-
 	db := stdlib.OpenDBFromPool(pool)
 	defer db.Close()
 
@@ -115,7 +140,7 @@ func initTripHandler(db *pgxpool.Pool) http.Handler {
 	return triprest.NewHandler(createSvc, listSvc)
 }
 
-func initDaySessionHandler(db *pgxpool.Pool) http.Handler {
+func initDaySessionHandler(db *pgxpool.Pool, llmClient *llmclient.Client) http.Handler {
 	daySessionRepo := daysessionrepository.NewDaySessionRepository(db)
 	planRepo := planrepository.NewPlanVersionRepository(db)
 	planStopRepo := planrepository.NewPlanStopRepository(db)
@@ -124,7 +149,9 @@ func initDaySessionHandler(db *pgxpool.Pool) http.Handler {
 	listDaySessionSvc := daysessionservice.NewGetDaySessionService(daySessionRepo, planRepo, planStopRepo, eventRepo)
 	getDaySessionSvc := daysessionservice.NewListDaySessionService(daySessionRepo)
 	updateActivePlanSvc := daysessionservice.NewSetActivePlanService(daySessionRepo)
-	return daysessionrest.NewHandler(createDaySessionSvc, listDaySessionSvc, getDaySessionSvc, updateActivePlanSvc)
+	planGenerator := day_sessionai.NewPlanGenerator(llmClient)
+	generateLLMPlanSvc := daysessionservice.NewGenerateLLMPlanService(planGenerator)
+	return daysessionrest.NewHandler(createDaySessionSvc, listDaySessionSvc, getDaySessionSvc, updateActivePlanSvc, generateLLMPlanSvc)
 }
 
 func initPlanVersionHandler(db *pgxpool.Pool) http.Handler {
