@@ -1,110 +1,76 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
-from typing import List
+from pydantic import BaseModel, ConfigDict, Field
+from uuid import UUID
 
-class Stop(BaseModel):
-    position: int
-    title: str
-    category_label: str
+
+class StrictModel(BaseModel):
+    model_config = ConfigDict(strict=True, extra="forbid")
+
+
+class PlanRequest(StrictModel):
+    day_session_id: UUID
+
+
+class Stop(StrictModel):
+    position: int = Field(gt=0)
+    title: str = Field(min_length=1)
+    category_label: str = Field(min_length=1)
     image_url: str
-    planned_arrival: str
-    planned_departure: str
-    travel_minutes: int
-    stay_minutes: int
+    planned_arrival: str = Field(pattern=r"^(?:[01]\d|2[0-3]):[0-5]\d$")
+    planned_departure: str = Field(pattern=r"^(?:[01]\d|2[0-3]):[0-5]\d$")
+    travel_minutes: int = Field(ge=0)
+    stay_minutes: int = Field(gt=0)
 
-class PlanRequest(BaseModel):
-    day_session_id: str
 
-class PlanResponse(BaseModel):
-    stops: List[Stop]
+class PlanResponse(StrictModel):
+    stops: list[Stop] = Field(min_length=1)
 
-class ReplanRequest(BaseModel):
-    day_session_id: str
-
-class ReplanResponse(BaseModel):
-    stops: List[Stop]
 
 app = FastAPI(
     title="Trip Planner LLM Service",
-    version="1.0.0"
+    version="1.0.0",
 )
 
+
 @app.get("/")
-def health():
-    return {
-        "status": "running"
-    }
+def health() -> dict[str, str]:
+    return {"status": "running"}
+
 
 @app.post("/plan", response_model=PlanResponse)
-def generate_plan(request: PlanRequest):
-    return {
-        "stops": [
-            {
-                "position": 1,
-                "title": "Bangalore Palace",
-                "category_label": "Sightseeing",
-                "image_url": "",
-                "planned_arrival": "09:00",
-                "planned_departure": "10:30",
-                "travel_minutes": 20,
-                "stay_minutes": 90
-            },
-            {
-                "position": 2,
-                "title": "Cubbon Park",
-                "category_label": "Sightseeing",
-                "image_url": "",
-                "planned_arrival": "11:00",
-                "planned_departure": "12:00",
-                "travel_minutes": 15,
-                "stay_minutes": 60
-            },
-            {
-                "position": 3,
-                "title": "UB City",
-                "category_label": "Dining",
-                "image_url": "",
-                "planned_arrival": "12:30",
-                "planned_departure": "14:00",
-                "travel_minutes": 10,
-                "stay_minutes": 90
-            }
+def generate_plan(request: PlanRequest) -> PlanResponse:
+    # Deterministic contract implementation. No real AI provider is called yet.
+    return PlanResponse(
+        stops=[
+            Stop(
+                position=1,
+                title="Bangalore Palace",
+                category_label="Sightseeing",
+                image_url="",
+                planned_arrival="09:00",
+                planned_departure="10:30",
+                travel_minutes=20,
+                stay_minutes=90,
+            ),
+            Stop(
+                position=2,
+                title="Cubbon Park",
+                category_label="Sightseeing",
+                image_url="",
+                planned_arrival="11:00",
+                planned_departure="12:00",
+                travel_minutes=15,
+                stay_minutes=60,
+            ),
+            Stop(
+                position=3,
+                title="UB City",
+                category_label="Dining",
+                image_url="",
+                planned_arrival="12:30",
+                planned_departure="14:00",
+                travel_minutes=10,
+                stay_minutes=90,
+            ),
         ]
-    }
-
-@app.post("/replan", response_model=ReplanResponse)
-def replan(request: ReplanRequest):
-    return {
-        "stops": [
-            {
-                "position": 1,
-                "title": "Cubbon Park",
-                "category_label": "Sightseeing",
-                "image_url": "",
-                "planned_arrival": "09:00",
-                "planned_departure": "10:00",
-                "travel_minutes": 15,
-                "stay_minutes": 60
-            },
-            {
-                "position": 2,
-                "title": "Bangalore Palace",
-                "category_label": "Sightseeing",
-                "image_url": "",
-                "planned_arrival": "10:30",
-                "planned_departure": "12:00",
-                "travel_minutes": 20,
-                "stay_minutes": 90
-            },
-            {
-                "position": 3,
-                "title": "UB City",
-                "category_label": "Dining",
-                "image_url": "",
-                "planned_arrival": "12:30",
-                "planned_departure": "14:00",
-                "travel_minutes": 10,
-                "stay_minutes": 90
-            }
-        ]
-    }
+    )
