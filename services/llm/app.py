@@ -8,7 +8,7 @@ class StrictModel(BaseModel):
 
 
 class PlanRequest(StrictModel):
-    day_session_id: UUID
+    day_session_id: UUID = Field(strict=False)
 
 
 class Stop(StrictModel):
