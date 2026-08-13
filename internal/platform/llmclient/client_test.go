@@ -34,6 +34,22 @@ func TestClientPlanContract(t *testing.T) {
 			t.Fatalf("day_session_id = %s, want %s", request.DaySessionID, testDaySessionID)
 		}
 
+		arrival, err := time.Parse(
+			time.RFC3339,
+			"2026-08-13T09:00:00+05:30",
+		)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		departure, err := time.Parse(
+			time.RFC3339,
+			"2026-08-13T10:30:00+05:30",
+		)
+		if err != nil {
+			t.Fatal(err)
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(PlanResponse{
 			Stops: []Stop{{
@@ -41,8 +57,8 @@ func TestClientPlanContract(t *testing.T) {
 				Title:            "Bangalore Palace",
 				CategoryLabel:    "Sightseeing",
 				ImageURL:         "",
-				PlannedArrival:   "09:00",
-				PlannedDeparture: "10:30",
+				PlannedArrival:   arrival,
+				PlannedDeparture: departure,
 				TravelMinutes:    20,
 				StayMinutes:      90,
 			}},
