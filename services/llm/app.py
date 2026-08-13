@@ -1,6 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 from uuid import UUID
+from datetime import datetime
+from prompts.plan_prompt import build_plan_prompt
+from llm.client import LLMClient
+import json
 
 
 class StrictModel(BaseModel):
@@ -9,15 +13,18 @@ class StrictModel(BaseModel):
 
 class PlanRequest(StrictModel):
     day_session_id: UUID = Field(strict=False)
-
+    destination: str = Field(min_length=1)
+    date: str = Field(min_length=1)
+    start_time: str = Field(min_length=1)
+    start_label: str = Field(min_length=1)
 
 class Stop(StrictModel):
     position: int = Field(gt=0)
     title: str = Field(min_length=1)
     category_label: str = Field(min_length=1)
     image_url: str
-    planned_arrival: str = Field(pattern=r"^(?:[01]\d|2[0-3]):[0-5]\d$")
-    planned_departure: str = Field(pattern=r"^(?:[01]\d|2[0-3]):[0-5]\d$")
+    planned_arrival: datetime
+    planned_departure: datetime
     travel_minutes: int = Field(ge=0)
     stay_minutes: int = Field(gt=0)
 
@@ -37,40 +44,44 @@ def health() -> dict[str, str]:
     return {"status": "running"}
 
 
+llm_client = LLMClient()
+
+
 @app.post("/plan", response_model=PlanResponse)
 def generate_plan(request: PlanRequest) -> PlanResponse:
-    # Deterministic contract implementation. No real AI provider is called yet.
-    return PlanResponse(
-        stops=[
-            Stop(
-                position=1,
-                title="Bangalore Palace",
-                category_label="Sightseeing",
-                image_url="",
-                planned_arrival="09:00",
-                planned_departure="10:30",
-                travel_minutes=20,
-                stay_minutes=90,
-            ),
-            Stop(
-                position=2,
-                title="Cubbon Park",
-                category_label="Sightseeing",
-                image_url="",
-                planned_arrival="11:00",
-                planned_departure="12:00",
-                travel_minutes=15,
-                stay_minutes=60,
-            ),
-            Stop(
-                position=3,
-                title="UB City",
-                category_label="Dining",
-                image_url="",
-                planned_arrival="12:30",
-                planned_departure="14:00",
-                travel_minutes=10,
-                stay_minutes=90,
-            ),
-        ]
+
+    prompt = build_plan_prompt(
+        destination=request.destination,
+        date=request.date,
+        start_time=request.start_time,
+        start_label=request.start_label,
     )
+
+    try:
+        response = llm_client.generate(prompt)
+
+    except Exception as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=f"LLM request failed: {exc}",
+        ) from exc
+
+    try:
+        data = json.loads(response)
+
+    except json.JSONDecodeError as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=f"LLM returned invalid JSON: {exc}",
+        ) from exc
+
+    try:
+        plan = PlanResponse.model_validate(data)
+
+    except Exception as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=f"LLM returned invalid plan response: {exc}",
+        ) from exc
+
+    return plan

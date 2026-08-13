@@ -2,12 +2,17 @@ package llmclient
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 )
 
 type PlanRequest struct {
-	DaySessionID string `json:"day_session_id"`
+    DaySessionID string `json:"day_session_id"`
+    Destination  string `json:"destination"`
+    Date         string `json:"date"`
+    StartTime    string `json:"start_time"`
+    StartLabel   string `json:"start_label"`
 }
 
 func (r PlanRequest) Validate() error {
@@ -21,14 +26,14 @@ func (r PlanRequest) Validate() error {
 }
 
 type Stop struct {
-	Position         int    `json:"position"`
-	Title            string `json:"title"`
-	CategoryLabel    string `json:"category_label"`
-	ImageURL         string `json:"image_url"`
-	PlannedArrival   string `json:"planned_arrival"`
-	PlannedDeparture string `json:"planned_departure"`
-	TravelMinutes    int    `json:"travel_minutes"`
-	StayMinutes      int    `json:"stay_minutes"`
+	Position         int       `json:"position"`
+	Title            string    `json:"title"`
+	CategoryLabel    string    `json:"category_label"`
+	ImageURL         string    `json:"image_url"`
+	PlannedArrival   time.Time `json:"planned_arrival"`
+	PlannedDeparture time.Time `json:"planned_departure"`
+	TravelMinutes    int       `json:"travel_minutes"`
+	StayMinutes      int       `json:"stay_minutes"`
 }
 
 type PlanResponse struct {
@@ -48,7 +53,11 @@ func (r PlanResponse) Validate() error {
 }
 
 type ReplanRequest struct {
-	DaySessionID string `json:"day_session_id"`
+    DaySessionID string `json:"day_session_id"`
+    Destination  string `json:"destination"`
+    Date         string `json:"date"`
+    StartTime    string `json:"start_time"`
+    StartLabel   string `json:"start_label"`
 }
 
 func (r ReplanRequest) Validate() error {

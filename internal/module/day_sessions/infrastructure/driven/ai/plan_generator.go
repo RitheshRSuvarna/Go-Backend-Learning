@@ -12,22 +12,33 @@ type PlanGenerator struct {
 }
 
 func NewPlanGenerator(client *llmclient.Client) *PlanGenerator {
-	return &PlanGenerator{client: client}
+	return &PlanGenerator{
+		client: client,
+	}
 }
 
-func (g *PlanGenerator) GeneratePlan(ctx context.Context, request port.PlanRequest) (port.PlanResponse, error) {
+func (g *PlanGenerator) GeneratePlan(
+	ctx context.Context,
+	request port.PlanRequest,
+) (port.PlanResponse, error) {
+
 	response, err := g.client.Plan(ctx, llmclient.PlanRequest{
 		DaySessionID: request.DaySessionID,
+		Destination:  request.Destination,
+		Date:         request.Date,
+		StartTime:    request.StartTime,
+		StartLabel:   request.StartLabel,
 	})
 	if err != nil {
 		return port.PlanResponse{}, err
 	}
 
 	stops := make([]port.PlanStop, 0, len(response.Stops))
+
 	for _, stop := range response.Stops {
 		stops = append(stops, port.PlanStop{
 			Position:         stop.Position,
-			Title:            stop.Title,
+			Title:             stop.Title,
 			CategoryLabel:    stop.CategoryLabel,
 			ImageURL:         stop.ImageURL,
 			PlannedArrival:   stop.PlannedArrival,
@@ -37,5 +48,7 @@ func (g *PlanGenerator) GeneratePlan(ctx context.Context, request port.PlanReque
 		})
 	}
 
-	return port.PlanResponse{Stops: stops}, nil
+	return port.PlanResponse{
+		Stops: stops,
+	}, nil
 }

@@ -1,9 +1,16 @@
 package port
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 type PlanRequest struct {
-	DaySessionID string
+    DaySessionID string
+    Destination  string
+    Date         string
+    StartTime    string
+    StartLabel   string
 }
 
 type PlanStop struct {
@@ -11,8 +18,8 @@ type PlanStop struct {
 	Title            string
 	CategoryLabel    string
 	ImageURL         string
-	PlannedArrival   string
-	PlannedDeparture string
+	PlannedArrival   time.Time
+	PlannedDeparture time.Time
 	TravelMinutes    int
 	StayMinutes      int
 }

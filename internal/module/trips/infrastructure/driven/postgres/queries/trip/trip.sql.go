@@ -52,6 +52,35 @@ func (q *Queries) CreateTrip(ctx context.Context, arg CreateTripParams) (CreateT
 	return i, err
 }
 
+const getTripByID = `-- name: GetTripByID :one
+SELECT id, destination, start_date, end_date, travelers_count, created_at
+FROM trips
+WHERE id = $1
+`
+
+type GetTripByIDRow struct {
+	ID             pgtype.UUID        `json:"id"`
+	Destination    string             `json:"destination"`
+	StartDate      pgtype.Date        `json:"start_date"`
+	EndDate        pgtype.Date        `json:"end_date"`
+	TravelersCount int32              `json:"travelers_count"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+}
+
+func (q *Queries) GetTripByID(ctx context.Context, id pgtype.UUID) (GetTripByIDRow, error) {
+	row := q.db.QueryRow(ctx, getTripByID, id)
+	var i GetTripByIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.Destination,
+		&i.StartDate,
+		&i.EndDate,
+		&i.TravelersCount,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const listTrips = `-- name: ListTrips :many
 SELECT id, destination, start_date, end_date, travelers_count, created_at
 FROM trips

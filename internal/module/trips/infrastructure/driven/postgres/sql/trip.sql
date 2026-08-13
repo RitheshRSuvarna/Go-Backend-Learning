@@ -7,3 +7,8 @@ RETURNING id, destination,start_date, end_date, travelers_count, created_at;
 SELECT id, destination, start_date, end_date, travelers_count, created_at
 FROM trips
 ORDER BY created_at DESC;
+
+-- name: GetTripByID :one
+SELECT id, destination, start_date, end_date, travelers_count, created_at
+FROM trips
+WHERE id = $1;
