@@ -129,7 +129,7 @@ func TestClientPlanRejectsInvalidRequest(t *testing.T) {
 func TestClientPlanRejectsUnknownResponseFields(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"stops":[{"position":1,"title":"Bangalore Palace","category_label":"Sightseeing","image_url":"","planned_arrival":"09:00","planned_departure":"10:30","travel_minutes":20,"stay_minutes":90,"unexpected":"field"}]}`))
+		_, _ = w.Write([]byte(`{"stops":[{"position":1,"title":"Bangalore Palace","category_label":"Sightseeing","image_url":"","planned_arrival":"2026-08-13T09:00:00+05:30","planned_departure":"2026-08-13T10:00:00+05:30","travel_minutes":20,"stay_minutes":90,"unexpected":"field"}]}`))
 	}))
 	defer server.Close()
 

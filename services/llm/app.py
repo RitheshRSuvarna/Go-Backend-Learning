@@ -1,3 +1,6 @@
+from pathlib import Path
+from urllib import response
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 from uuid import UUID
@@ -5,6 +8,9 @@ from datetime import datetime
 from prompts.plan_prompt import build_plan_prompt
 from llm.client import LLMClient
 import json
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(PROJECT_ROOT / ".env")
 
 
 class StrictModel(BaseModel):
@@ -23,8 +29,8 @@ class Stop(StrictModel):
     title: str = Field(min_length=1)
     category_label: str = Field(min_length=1)
     image_url: str
-    planned_arrival: datetime
-    planned_departure: datetime
+    planned_arrival: datetime = Field(strict=False)
+    planned_departure: datetime = Field(strict=False)
     travel_minutes: int = Field(ge=0)
     stay_minutes: int = Field(gt=0)
 
@@ -66,6 +72,9 @@ def generate_plan(request: PlanRequest) -> PlanResponse:
             detail=f"LLM request failed: {exc}",
         ) from exc
 
+    print("RAW LLM RESPONSE:")
+    print(response)
+    
     try:
         data = json.loads(response)
 

@@ -35,6 +35,7 @@ import (
 	"github.com/pressly/goose/v3"
 
 	_ "api/internal/swaggerdoc"
+
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
@@ -69,7 +70,7 @@ func main() {
 		llmBaseURL = "http://localhost:8000"
 	}
 
-	llmTimeout := 10 * time.Second
+	llmTimeout := 60 * time.Second
 	if raw := os.Getenv("LLM_TIMEOUT"); raw != "" {
 		parsed, err := time.ParseDuration(raw)
 		if err != nil {
@@ -142,6 +143,7 @@ func initTripHandler(db *pgxpool.Pool) http.Handler {
 
 func initDaySessionHandler(db *pgxpool.Pool, llmClient *llmclient.Client) http.Handler {
 	daySessionRepo := daysessionrepository.NewDaySessionRepository(db)
+	tripRepo := triprepository.NewTripRepository(db)
 	planRepo := planrepository.NewPlanVersionRepository(db)
 	planStopRepo := planrepository.NewPlanStopRepository(db)
 	eventRepo := eventrepository.NewEventsRepository(db)
@@ -150,7 +152,7 @@ func initDaySessionHandler(db *pgxpool.Pool, llmClient *llmclient.Client) http.H
 	getDaySessionSvc := daysessionservice.NewListDaySessionService(daySessionRepo)
 	updateActivePlanSvc := daysessionservice.NewSetActivePlanService(daySessionRepo)
 	planGenerator := day_sessionai.NewPlanGenerator(llmClient)
-	generateLLMPlanSvc := daysessionservice.NewGenerateLLMPlanService(planGenerator)
+	generateLLMPlanSvc := daysessionservice.NewGenerateLLMPlanService(planGenerator, daySessionRepo, tripRepo)
 	return daysessionrest.NewHandler(createDaySessionSvc, listDaySessionSvc, getDaySessionSvc, updateActivePlanSvc, generateLLMPlanSvc)
 }
 
