@@ -28,7 +28,7 @@ func (s *ListPlanStopService) ListPlanStop(ctx context.Context, id common.PlanVe
 
         dto.BusyRiskLabel = busy.Label(
             stop.CategoryLabel(),
-            stop.PlannedArrival().Format("15:04"),
+            stop.PlannedArrival(),
         )
 
         out = append(out, dto)

@@ -144,15 +144,15 @@ func initTripHandler(db *pgxpool.Pool) http.Handler {
 func initDaySessionHandler(db *pgxpool.Pool, llmClient *llmclient.Client) http.Handler {
 	daySessionRepo := daysessionrepository.NewDaySessionRepository(db)
 	tripRepo := triprepository.NewTripRepository(db)
-	planRepo := planrepository.NewPlanVersionRepository(db)
+	planVersionRepo := planrepository.NewPlanVersionRepository(db)
 	planStopRepo := planrepository.NewPlanStopRepository(db)
 	eventRepo := eventrepository.NewEventsRepository(db)
 	createDaySessionSvc := daysessionservice.NewDaySessionService(daySessionRepo)
-	listDaySessionSvc := daysessionservice.NewGetDaySessionService(daySessionRepo, planRepo, planStopRepo, eventRepo)
+	listDaySessionSvc := daysessionservice.NewGetDaySessionService(daySessionRepo, planVersionRepo, planStopRepo, eventRepo)
 	getDaySessionSvc := daysessionservice.NewListDaySessionService(daySessionRepo)
 	updateActivePlanSvc := daysessionservice.NewSetActivePlanService(daySessionRepo)
 	planGenerator := day_sessionai.NewPlanGenerator(llmClient)
-	generateLLMPlanSvc := daysessionservice.NewGenerateLLMPlanService(planGenerator, daySessionRepo, tripRepo)
+	generateLLMPlanSvc := daysessionservice.NewGenerateLLMPlanService(planGenerator, daySessionRepo, tripRepo, planVersionRepo, planStopRepo)
 	return daysessionrest.NewHandler(createDaySessionSvc, listDaySessionSvc, getDaySessionSvc, updateActivePlanSvc, generateLLMPlanSvc)
 }
 
