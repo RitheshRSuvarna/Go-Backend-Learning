@@ -28,6 +28,10 @@ For every stop provide:
 IMPORTANT:
 - planned_arrival MUST be a complete ISO 8601 datetime.
 - planned_departure MUST be a complete ISO 8601 datetime.
+- Travel time between stops must be realistic.
+- Travel minutes must be greater than 0
+- Stay minutes must be greater than 0
+- Give some random Image URL for each stop, but it can be empty.
 - Use the provided date: {date}.
 - Use the local timezone for the destination.
 - Do NOT return only HH:MM.
