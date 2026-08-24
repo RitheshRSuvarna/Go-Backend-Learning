@@ -19,7 +19,7 @@ func (r *PostgresPlanVersionRepository) ListPlanVersion(ctx context.Context, id 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to list planversion:%w", err)
 	}
-	out := make([]*entity.PlanVersion, len(row))
+	out := make([]*entity.PlanVersion, 0, len(row))
 	for _, row := range row {
 		planversion, err := rowToDomainPlanVersion(
 			row.ID,

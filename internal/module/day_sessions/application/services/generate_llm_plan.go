@@ -3,8 +3,11 @@ package services
 import (
 	"common"
 	"context"
+	"errors"
 	"fmt"
 	busy "plans/busy"
+
+	"github.com/jackc/pgx/v5"
 
 	"day_session/domain/port"
 	"day_session/domain/repository"
@@ -82,7 +85,16 @@ func (s *GenerateLLMPlanService) GeneratePlan(
 
 	latestVersion, err := s.planVersionRepo.GetLatestVersion(ctx, id)
 	if err != nil {
-    	return port.PlanResponse{}, fmt.Errorf( "failed to get latest plan version: %w", err)
+		if errors.Is(err, pgx.ErrNoRows) {
+			// No plan exists yet.
+			// This is the first plan.
+			latestVersion = 0
+		} else {
+			return port.PlanResponse{}, fmt.Errorf(
+				"failed to get latest plan version: %w",
+				err,
+			)
+		}
 	}
 
 	nextVersion := latestVersion + 1
