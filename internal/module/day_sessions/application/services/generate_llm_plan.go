@@ -80,12 +80,17 @@ func (s *GenerateLLMPlanService) GeneratePlan(
 		return port.PlanResponse{}, err
 	}
 
-	i := 2
-	version, err := entity.NewPlanVersion(id, i, "Initial version")
+	latestVersion, err := s.planVersionRepo.GetLatestVersion(ctx, id)
+	if err != nil {
+    	return port.PlanResponse{}, fmt.Errorf( "failed to get latest plan version: %w", err)
+	}
+
+	nextVersion := latestVersion + 1
+
+	version, err := entity.NewPlanVersion(id, nextVersion, "Initial version")
 	if err != nil {
 		return port.PlanResponse{}, err
 	}
-	i += 1
 
 	if err := s.planVersionRepo.Create(ctx, version); err != nil {
 		return port.PlanResponse{}, err

@@ -20,3 +20,8 @@ SELECT id, day_session_id, version, notes, created_at
 FROM plan_versions
 WHERE day_session_id = $1
 ORDER BY version ASC;
+
+-- name: GetLatestPlanVersion :one
+SELECT version FROM plan_versions
+WHERE day_session_id = $1
+ORDER BY version DESC;

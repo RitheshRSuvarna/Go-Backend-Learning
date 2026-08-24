@@ -57,6 +57,19 @@ func (q *Queries) GetActivePlan(ctx context.Context, daySessionID pgtype.UUID) (
 	return i, err
 }
 
+const getLatestPlanVersion = `-- name: GetLatestPlanVersion :one
+SELECT version FROM plan_versions
+WHERE day_session_id = $1
+ORDER BY version DESC
+`
+
+func (q *Queries) GetLatestPlanVersion(ctx context.Context, daySessionID pgtype.UUID) (int32, error) {
+	row := q.db.QueryRow(ctx, getLatestPlanVersion, daySessionID)
+	var version int32
+	err := row.Scan(&version)
+	return version, err
+}
+
 const getPlanVersionByID = `-- name: GetPlanVersionByID :one
 SELECT id, day_session_id, version, notes, created_at
 FROM plan_versions

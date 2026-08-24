@@ -31,7 +31,7 @@ IMPORTANT:
 - Travel time between stops must be realistic.
 - Travel minutes must be greater than 0
 - Stay minutes must be greater than 0
-- Give some random Image URL for each stop, but it can be empty.
+- Give some random Image URL for each stop, but it canno't be empty.
 - Use the provided date: {date}.
 - Use the local timezone for the destination.
 - Do NOT return only HH:MM.
