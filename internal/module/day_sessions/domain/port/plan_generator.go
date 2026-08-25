@@ -13,6 +13,28 @@ type PlanRequest struct {
     StartLabel   string
 }
 
+type RePlanRequest struct {
+	DaySessionID string
+	Destination  string
+    Date         string
+    StartTime    string
+    StartLabel   string
+
+    ExistingPlanStops []RePlanStop
+}
+
+type RePlanStop struct {
+	Position         int
+	Title            string
+	CategoryLabel    string
+	ImageURL         string
+	PlannedArrival   time.Time
+	PlannedDeparture time.Time
+	TravelMinutes    int
+	StayMinutes      int
+}
+
+
 type PlanStop struct {
 	Position         int
 	Title            string
@@ -30,4 +52,5 @@ type PlanResponse struct {
 
 type PlanGenerator interface {
 	GeneratePlan(ctx context.Context, request PlanRequest) (PlanResponse, error)
+	Replan(ctx context.Context, req RePlanRequest) (PlanResponse, error)
 }

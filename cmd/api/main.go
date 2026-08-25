@@ -70,7 +70,7 @@ func main() {
 		llmBaseURL = "http://localhost:8000"
 	}
 
-	llmTimeout := 60 * time.Second
+	llmTimeout := 2 * time.Minute
 	if raw := os.Getenv("LLM_TIMEOUT"); raw != "" {
 		parsed, err := time.ParseDuration(raw)
 		if err != nil {
@@ -94,6 +94,7 @@ func main() {
 	mux.Handle("/api/day-sessions/{trip_id}", http.StripPrefix("/api", initDaySessionHandler(db, llmClient)))
 	mux.Handle("/api/day-session/{id}", http.StripPrefix("/api", initDaySessionHandler(db, llmClient)))
 	mux.Handle("/api/day-sessions/{id}/llm/plan", http.StripPrefix("/api", initDaySessionHandler(db, llmClient)))
+	mux.Handle("/api/day-sessions/{id}/llm/replan", http.StripPrefix("/api", initDaySessionHandler(db, llmClient)))
 	mux.Handle("/api/day-sessions/{id}/plan-versions", http.StripPrefix("/api", initPlanVersionHandler(db)))
 	mux.Handle("/api/day-sessions/{id}/stop", http.StripPrefix("/api", initPlanStopHandler(db)))
 	mux.Handle("/api/day-sessions/{id}/active-plan", http.StripPrefix("/api", initPlanVersionHandler(db)))
@@ -191,7 +192,7 @@ func initEventsHandler(db *pgxpool.Pool) http.Handler {
 
 func healthHandler(db *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 		defer cancel()
 
 		status := "healthy"

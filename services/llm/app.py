@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from uuid import UUID
 from datetime import datetime
 from prompts.plan_prompt import build_plan_prompt
+from prompts.replan_prompt import build_replan_prompt
 from llm.client import LLMClient
 import json
 
@@ -34,9 +35,20 @@ class Stop(StrictModel):
     travel_minutes: int = Field(ge=0)
     stay_minutes: int = Field(gt=0)
 
+class PlanResponse(StrictModel):
+    stops: list[Stop] = Field(min_length=1)
+
+class ReplanRequest(StrictModel):
+    day_session_id: UUID = Field(strict=False)
+    destination: str = Field(min_length=1)
+    date: str = Field(min_length=1)
+    start_time: str = Field(min_length=1)
+    start_label: str = Field(min_length=1)
+    existing_plan_stops: list[Stop] = Field(min_length=1)
 
 class PlanResponse(StrictModel):
     stops: list[Stop] = Field(min_length=1)
+
 
 
 app = FastAPI(
@@ -91,6 +103,51 @@ def generate_plan(request: PlanRequest) -> PlanResponse:
         raise HTTPException(
             status_code=502,
             detail=f"LLM returned invalid plan response: {exc}",
+        ) from exc
+
+    return plan
+
+
+
+@app.post("/replan", response_model=PlanResponse)
+def replan(request: ReplanRequest) -> PlanResponse:
+
+    prompt = build_replan_prompt(
+        destination=request.destination,
+        date=request.date,
+        start_time=request.start_time,
+        start_label=request.start_label,
+        existing_plan_stops=request.existing_plan_stops,
+    )
+
+    try:
+        response = llm_client.generate(prompt)
+
+    except Exception as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=f"LLM request failed: {exc}",
+        ) from exc
+
+    print("RAW LLM REPLAN RESPONSE:")
+    print(response)
+
+    try:
+        data = json.loads(response)
+
+    except json.JSONDecodeError as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=f"LLM returned invalid JSON: {exc}",
+        ) from exc
+
+    try:
+        plan = PlanResponse.model_validate(data)
+
+    except Exception as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=f"LLM returned invalid replan response: {exc}",
         ) from exc
 
     return plan
