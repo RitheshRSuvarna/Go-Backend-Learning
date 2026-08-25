@@ -1,110 +1,96 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-from typing import List
+from pathlib import Path
+from urllib import response
+from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, ConfigDict, Field
+from uuid import UUID
+from datetime import datetime
+from prompts.plan_prompt import build_plan_prompt
+from llm.client import LLMClient
+import json
 
-class Stop(BaseModel):
-    position: int
-    title: str
-    category_label: str
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(PROJECT_ROOT / ".env")
+
+
+class StrictModel(BaseModel):
+    model_config = ConfigDict(strict=True, extra="forbid")
+
+
+class PlanRequest(StrictModel):
+    day_session_id: UUID = Field(strict=False)
+    destination: str = Field(min_length=1)
+    date: str = Field(min_length=1)
+    start_time: str = Field(min_length=1)
+    start_label: str = Field(min_length=1)
+
+class Stop(StrictModel):
+    position: int = Field(gt=0)
+    title: str = Field(min_length=1)
+    category_label: str = Field(min_length=1)
     image_url: str
-    planned_arrival: str
-    planned_departure: str
-    travel_minutes: int
-    stay_minutes: int
+    planned_arrival: datetime = Field(strict=False)
+    planned_departure: datetime = Field(strict=False)
+    travel_minutes: int = Field(ge=0)
+    stay_minutes: int = Field(gt=0)
 
-class PlanRequest(BaseModel):
-    day_session_id: str
 
-class PlanResponse(BaseModel):
-    stops: List[Stop]
+class PlanResponse(StrictModel):
+    stops: list[Stop] = Field(min_length=1)
 
-class ReplanRequest(BaseModel):
-    day_session_id: str
-
-class ReplanResponse(BaseModel):
-    stops: List[Stop]
 
 app = FastAPI(
     title="Trip Planner LLM Service",
-    version="1.0.0"
+    version="1.0.0",
 )
 
+
 @app.get("/")
-def health():
-    return {
-        "status": "running"
-    }
+def health() -> dict[str, str]:
+    return {"status": "running"}
+
+
+llm_client = LLMClient()
+
 
 @app.post("/plan", response_model=PlanResponse)
-def generate_plan(request: PlanRequest):
-    return {
-        "stops": [
-            {
-                "position": 1,
-                "title": "Bangalore Palace",
-                "category_label": "Sightseeing",
-                "image_url": "",
-                "planned_arrival": "09:00",
-                "planned_departure": "10:30",
-                "travel_minutes": 20,
-                "stay_minutes": 90
-            },
-            {
-                "position": 2,
-                "title": "Cubbon Park",
-                "category_label": "Sightseeing",
-                "image_url": "",
-                "planned_arrival": "11:00",
-                "planned_departure": "12:00",
-                "travel_minutes": 15,
-                "stay_minutes": 60
-            },
-            {
-                "position": 3,
-                "title": "UB City",
-                "category_label": "Dining",
-                "image_url": "",
-                "planned_arrival": "12:30",
-                "planned_departure": "14:00",
-                "travel_minutes": 10,
-                "stay_minutes": 90
-            }
-        ]
-    }
+def generate_plan(request: PlanRequest) -> PlanResponse:
 
-@app.post("/replan", response_model=ReplanResponse)
-def replan(request: ReplanRequest):
-    return {
-        "stops": [
-            {
-                "position": 1,
-                "title": "Cubbon Park",
-                "category_label": "Sightseeing",
-                "image_url": "",
-                "planned_arrival": "09:00",
-                "planned_departure": "10:00",
-                "travel_minutes": 15,
-                "stay_minutes": 60
-            },
-            {
-                "position": 2,
-                "title": "Bangalore Palace",
-                "category_label": "Sightseeing",
-                "image_url": "",
-                "planned_arrival": "10:30",
-                "planned_departure": "12:00",
-                "travel_minutes": 20,
-                "stay_minutes": 90
-            },
-            {
-                "position": 3,
-                "title": "UB City",
-                "category_label": "Dining",
-                "image_url": "",
-                "planned_arrival": "12:30",
-                "planned_departure": "14:00",
-                "travel_minutes": 10,
-                "stay_minutes": 90
-            }
-        ]
-    }
+    prompt = build_plan_prompt(
+        destination=request.destination,
+        date=request.date,
+        start_time=request.start_time,
+        start_label=request.start_label,
+    )
+
+    try:
+        response = llm_client.generate(prompt)
+
+    except Exception as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=f"LLM request failed: {exc}",
+        ) from exc
+
+    print("RAW LLM RESPONSE:")
+    print(response)
+    
+    try:
+        data = json.loads(response)
+
+    except json.JSONDecodeError as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=f"LLM returned invalid JSON: {exc}",
+        ) from exc
+
+    try:
+        plan = PlanResponse.model_validate(data)
+
+    except Exception as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=f"LLM returned invalid plan response: {exc}",
+        ) from exc
+
+    return plan

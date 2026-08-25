@@ -2,12 +2,13 @@ package repository
 
 import (
 	"time"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func dateStringToPGDate(value string) (pgtype.Date, error) {
-	t, err := time.Parse("2006-05-01", value)
+	t, err := time.Parse("2006-01-02", value)
 	if err != nil {
 		return pgtype.Date{}, err
 	}
@@ -18,7 +19,7 @@ func pgDateToString(d pgtype.Date) string {
 	if !d.Valid {
 		return ""
 	}
-	return d.Time.Format("2006-05-01")
+	return d.Time.Format("2006-01-02")
 }
 
 func uuidStringToPgUUID(id string) (pgtype.UUID, error) {

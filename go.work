@@ -9,5 +9,6 @@ use (
 	./internal/module/plans
 	./internal/module/trips
 	./internal/platform/common
+	./internal/platform/llmclient
 	./internal/platform/postgres
 )

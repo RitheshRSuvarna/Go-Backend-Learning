@@ -5,7 +5,6 @@ import (
 	"context"
 	"day_session/application/dto"
 
-	// "encoding/json"
 	evententity "events/domain/entity"
 	"fmt"
 	planentity "plans/domain/entity"
