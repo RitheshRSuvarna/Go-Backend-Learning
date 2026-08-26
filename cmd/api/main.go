@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"llmclient"
 
 	assistantsuggservice "assistant_suggestions/application/services"
 	assistantsuggrepository "assistant_suggestions/infrastructure/driven/postgres/repository"
@@ -19,7 +20,6 @@ import (
 	eventservice "events/application/services"
 	eventrepository "events/infrastructure/driven/postgres/repository"
 	eventrest "events/infrastructure/driving/rest"
-	"llmclient"
 	planservice "plans/application/services"
 	planrepository "plans/infrastructure/driven/postgres/repository"
 	planstoprest "plans/infrastructure/driving/rest"
