@@ -27,45 +27,169 @@ func NewCreateEventsService(repo repository.EventsRepository, planRepo plansrepo
 	}
 }
 
-func (e *CreateEventService) CreateEvents(ctx context.Context, cmd command.CreateEventsCommand) (dto.EventsDTO, error) {
+// func (e *CreateEventService) CreateEvents(ctx context.Context, cmd command.CreateEventsCommand) (dto.EventsDTO, error) {
+
+// 	daySessionID, err := common.NewDaySessionID(cmd.DaySessionID)
+// 	if err != nil {
+// 		return dto.EventsDTO{}, err
+// 	}
+
+// 	activePlan, err := e.planRepo.GetActivePlan(ctx, daySessionID)
+// 	if err != nil {
+// 		return dto.EventsDTO{}, err
+// 	}
+
+// 	planStops, err := e.planStopRepo.ListStop(ctx, activePlan.ID())
+// 	if err != nil {
+// 		return dto.EventsDTO{}, err
+// 	}
+
+// 	events, err := e.repo.GetEvents(ctx, daySessionID)
+// 	if err != nil {
+// 		return dto.EventsDTO{}, err
+// 	}
+
+// 	var latestReached *entity.Events
+
+// 	for _, event := range events {
+// 		if event.EventType() == "Reached" {
+// 			latestReached = event
+// 			break
+// 		}
+// 	}
+
+// 	if latestReached == nil {
+// 		return dto.EventsDTO{}, fmt.Errorf("no reached event found")
+// 	}
+
+// 	planStopID, err := latestReached.PlanStopID()
+// 	if err != nil {
+// 		return dto.EventsDTO{}, err
+// 	}
+
+// 	var currentStop *plansentity.PlanStop
+
+// 	for _, stop := range planStops {
+// 		if stop.ID().String() == planStopID {
+// 			currentStop = stop
+// 			break
+// 		}
+// 	}
+
+// 	if currentStop == nil {
+// 		return dto.EventsDTO{}, fmt.Errorf("matching plan stop not found")
+// 	}
+
+// 	payload := entity.Payload{
+// 		PlanStopID: currentStop.ID().String(),
+// 	}
+
+// 	payloadJSON, err := json.Marshal(payload)
+// 	if err != nil {
+// 		return dto.EventsDTO{}, err
+// 	}
+
+// 	event, err := entity.NewEvents(
+// 		cmd.DaySessionID,
+// 		cmd.EventType,
+// 		payloadJSON,
+// 	)
+// 	if err != nil {
+// 		return dto.EventsDTO{}, err
+// 	}
+
+// 	if err := e.repo.CreateEvents(ctx, event); err != nil {
+// 		return dto.EventsDTO{}, err
+// 	}
+
+// 	return dto.ToEventDTO(event), nil
+// }
+
+func (e *CreateEventService) CreateEvents(
+	ctx context.Context,
+	cmd command.CreateEventsCommand,
+) (dto.EventsDTO, error) {
 
 	daySessionID, err := common.NewDaySessionID(cmd.DaySessionID)
 	if err != nil {
 		return dto.EventsDTO{}, err
 	}
 
+	// Get active plan
 	activePlan, err := e.planRepo.GetActivePlan(ctx, daySessionID)
 	if err != nil {
 		return dto.EventsDTO{}, err
 	}
 
+	// Get stops from active plan
 	planStops, err := e.planStopRepo.ListStop(ctx, activePlan.ID())
 	if err != nil {
 		return dto.EventsDTO{}, err
 	}
 
-	events, err := e.repo.GetEvents(ctx, daySessionID)
-	if err != nil {
-		return dto.EventsDTO{}, err
-	}
+	var planStopID string
 
-	var latestReached *entity.Events
+	// --------------------------------------------------
+	// First Reached event
+	// --------------------------------------------------
+	if cmd.EventType == "Reached" {
 
-	for _, event := range events {
-		if event.EventType() == "Reached" {
-			latestReached = event
-			break
+		var payload entity.Payload
+
+		if err := json.Unmarshal(cmd.Payload, &payload); err != nil {
+			return dto.EventsDTO{}, fmt.Errorf(
+				"invalid event payload: %w",
+				err,
+			)
+		}
+
+		if payload.PlanStopID == "" {
+			return dto.EventsDTO{}, fmt.Errorf(
+				"plan_stop_id is required",
+			)
+		}
+
+		planStopID = payload.PlanStopID
+
+	} else {
+
+		// --------------------------------------------------
+		// Delay / Skip events
+		// Use the latest Reached event
+		// --------------------------------------------------
+
+		events, err := e.repo.GetEvents(ctx, daySessionID)
+		if err != nil {
+			return dto.EventsDTO{}, err
+		}
+
+		var latestReached *entity.Events
+
+		for _, event := range events {
+			if event.EventType() == "Reached" {
+				latestReached = event
+				break
+			}
+		}
+
+		if latestReached == nil {
+			return dto.EventsDTO{}, fmt.Errorf(
+				"no reached event found",
+			)
+		}
+
+		planStopID, err = latestReached.PlanStopID()
+		if err != nil {
+			return dto.EventsDTO{}, fmt.Errorf(
+				"failed to get plan stop ID: %w",
+				err,
+			)
 		}
 	}
 
-	if latestReached == nil {
-		return dto.EventsDTO{}, fmt.Errorf("no reached event found")
-	}
-
-	planStopID, err := latestReached.PlanStopID()
-	if err != nil {
-		return dto.EventsDTO{}, err
-	}
+	// --------------------------------------------------
+	// Find the plan stop
+	// --------------------------------------------------
 
 	var currentStop *plansentity.PlanStop
 
@@ -77,8 +201,14 @@ func (e *CreateEventService) CreateEvents(ctx context.Context, cmd command.Creat
 	}
 
 	if currentStop == nil {
-		return dto.EventsDTO{}, fmt.Errorf("matching plan stop not found")
+		return dto.EventsDTO{}, fmt.Errorf(
+			"matching plan stop not found",
+		)
 	}
+
+	// --------------------------------------------------
+	// Create normalized payload
+	// --------------------------------------------------
 
 	payload := entity.Payload{
 		PlanStopID: currentStop.ID().String(),
@@ -86,8 +216,15 @@ func (e *CreateEventService) CreateEvents(ctx context.Context, cmd command.Creat
 
 	payloadJSON, err := json.Marshal(payload)
 	if err != nil {
-		return dto.EventsDTO{}, err
+		return dto.EventsDTO{}, fmt.Errorf(
+			"failed to marshal event payload: %w",
+			err,
+		)
 	}
+
+	// --------------------------------------------------
+	// Create event entity
+	// --------------------------------------------------
 
 	event, err := entity.NewEvents(
 		cmd.DaySessionID,
@@ -97,6 +234,10 @@ func (e *CreateEventService) CreateEvents(ctx context.Context, cmd command.Creat
 	if err != nil {
 		return dto.EventsDTO{}, err
 	}
+
+	// --------------------------------------------------
+	// Save event
+	// --------------------------------------------------
 
 	if err := e.repo.CreateEvents(ctx, event); err != nil {
 		return dto.EventsDTO{}, err
