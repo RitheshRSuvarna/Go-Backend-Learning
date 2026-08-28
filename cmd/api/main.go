@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"llmclient"
 	"log"
 	"net/http"
 	"os"
@@ -19,7 +20,6 @@ import (
 	eventservice "events/application/services"
 	eventrepository "events/infrastructure/driven/postgres/repository"
 	eventrest "events/infrastructure/driving/rest"
-	"llmclient"
 	planservice "plans/application/services"
 	planrepository "plans/infrastructure/driven/postgres/repository"
 	planstoprest "plans/infrastructure/driving/rest"
@@ -70,7 +70,7 @@ func main() {
 		llmBaseURL = "http://localhost:8000"
 	}
 
-	llmTimeout := 60 * time.Second
+	llmTimeout := 2 * time.Minute
 	if raw := os.Getenv("LLM_TIMEOUT"); raw != "" {
 		parsed, err := time.ParseDuration(raw)
 		if err != nil {
@@ -91,9 +91,11 @@ func main() {
 
 	mux.Handle("/swagger/", httpSwagger.WrapHandler)
 	mux.Handle("/api/trips", http.StripPrefix("/api", initTripHandler(db)))
+	mux.Handle("/api/trips/{trip_id}/itinerary", http.StripPrefix("/api", initTripHandler(db)))
 	mux.Handle("/api/day-sessions/{trip_id}", http.StripPrefix("/api", initDaySessionHandler(db, llmClient)))
-	mux.Handle("/api/day-session/{id}", http.StripPrefix("/api", initDaySessionHandler(db, llmClient)))
+	mux.Handle("/api/day-sessions/{id}/itinerary", http.StripPrefix("/api", initDaySessionHandler(db, llmClient)))
 	mux.Handle("/api/day-sessions/{id}/llm/plan", http.StripPrefix("/api", initDaySessionHandler(db, llmClient)))
+	mux.Handle("/api/day-sessions/{id}/llm/replan", http.StripPrefix("/api", initDaySessionHandler(db, llmClient)))
 	mux.Handle("/api/day-sessions/{id}/plan-versions", http.StripPrefix("/api", initPlanVersionHandler(db)))
 	mux.Handle("/api/day-sessions/{id}/stop", http.StripPrefix("/api", initPlanStopHandler(db)))
 	mux.Handle("/api/day-sessions/{id}/active-plan", http.StripPrefix("/api", initPlanVersionHandler(db)))
@@ -148,12 +150,12 @@ func initDaySessionHandler(db *pgxpool.Pool, llmClient *llmclient.Client) http.H
 	planStopRepo := planrepository.NewPlanStopRepository(db)
 	eventRepo := eventrepository.NewEventsRepository(db)
 	createDaySessionSvc := daysessionservice.NewDaySessionService(daySessionRepo)
-	listDaySessionSvc := daysessionservice.NewGetDaySessionService(daySessionRepo, planVersionRepo, planStopRepo, eventRepo)
-	getDaySessionSvc := daysessionservice.NewListDaySessionService(daySessionRepo)
+	getDaySessionSvc := daysessionservice.NewGetDaySessionService(daySessionRepo, planVersionRepo, planStopRepo, eventRepo)
+	listDaySessionSvc := daysessionservice.NewListDaySessionService(daySessionRepo)
 	updateActivePlanSvc := daysessionservice.NewSetActivePlanService(daySessionRepo)
 	planGenerator := day_sessionai.NewPlanGenerator(llmClient)
 	generateLLMPlanSvc := daysessionservice.NewGenerateLLMPlanService(planGenerator, daySessionRepo, tripRepo, planVersionRepo, planStopRepo)
-	return daysessionrest.NewHandler(createDaySessionSvc, listDaySessionSvc, getDaySessionSvc, updateActivePlanSvc, generateLLMPlanSvc)
+	return daysessionrest.NewHandler(createDaySessionSvc, getDaySessionSvc, listDaySessionSvc, updateActivePlanSvc, generateLLMPlanSvc)
 }
 
 func initPlanVersionHandler(db *pgxpool.Pool) http.Handler {
@@ -191,7 +193,7 @@ func initEventsHandler(db *pgxpool.Pool) http.Handler {
 
 func healthHandler(db *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 		defer cancel()
 
 		status := "healthy"

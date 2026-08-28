@@ -1,6 +1,8 @@
 package rest
 
 import (
+	"context"
+	"time"
 	"common"
 	"day_session/application/command"
 	_ "day_session/application/dto"
@@ -36,6 +38,11 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		if r.PathValue("id") != "" && strings.HasSuffix(r.URL.Path, "/llm/plan") {
 			h.generateLLMPlan(w, r)
+			return
+		}
+
+		if r.PathValue("id") != "" && strings.HasSuffix(r.URL.Path, "/llm/replan") {
+			h.replanLLMPlan(w, r)
 			return
 		}
 
@@ -141,6 +148,49 @@ func (h *Handler) generateLLMPlan(w http.ResponseWriter, r *http.Request) {
 	plan, err := h.generateLLMPlanService.GeneratePlan(r.Context(), daySessionID)
 	if err != nil {
 		writeError(w, r, http.StatusBadGateway, "llm_error", err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(plan)
+}
+
+// ReplanLLMPlan godoc
+// @Summary Replan a day-session plan using the LLM service
+// @Description Calls the deterministic LLM contract service to replan a day session.
+// @Tags DaySession
+// @Accept json
+// @Produce json
+// @Param id path string true "Day session ID"
+// @Success 200 {object} map[string]any
+// @Failure 400 {object} apiError
+// @Failure 502 {object} apiError
+// @Failure 504 {object} apiError
+// @Router /api/day-sessions/{id}/llm/replan [post]
+func (h *Handler) replanLLMPlan(w http.ResponseWriter, r *http.Request) {
+	daySessionID := r.PathValue("id")
+
+	if _, err := common.NewDaySessionID(daySessionID); err != nil {
+		writeDomainError(w, r, err)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 2*time.Minute)
+	defer cancel()
+
+	plan, err := h.generateLLMPlanService.Replan(
+		ctx,
+		daySessionID,
+	)
+	if err != nil {
+		writeError(
+			w,
+			r,
+			http.StatusBadGateway,
+			"llm_error",
+			err.Error(),
+		)
 		return
 	}
 

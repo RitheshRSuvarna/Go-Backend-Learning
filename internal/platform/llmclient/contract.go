@@ -58,6 +58,7 @@ type ReplanRequest struct {
     Date         string `json:"date"`
     StartTime    string `json:"start_time"`
     StartLabel   string `json:"start_label"`
+	ExistingPlanStops []Stop `json:"existing_plan_stops"`
 }
 
 func (r ReplanRequest) Validate() error {

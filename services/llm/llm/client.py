@@ -22,6 +22,7 @@ class LLMClient:
 
         response = self.client.chat.completions.create(
             model="Qwen/Qwen3-32B",
+            # model="ornith-ai/Ornith-1.5-35B-A3B",
             messages=[
                 {
                     "role": "user",
