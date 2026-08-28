@@ -6,6 +6,7 @@ import (
 	"events/application/command"
 	_ "events/application/dto"
 	"events/application/services"
+	"fmt"
 	"net/http"
 )
 
@@ -81,6 +82,7 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 		Payload:      req.Payload,
 	})
 	if err != nil {
+		fmt.Printf("CREATE EVENT ERROR: %+v\n", err)
 		writeDomainError(w, r, err)
 		return
 	}

@@ -69,8 +69,6 @@ func (d *GetDaySessionService) GetDaySession(ctx context.Context, daysessionid c
 		return dto.DaySessionResponseDTO{}, fmt.Errorf("no reached event found")
 	}
 
-	// var payload map[string]any
-
 	planStopID, err := latestEvent.PlanStopID()
 	if err != nil {
 		return dto.DaySessionResponseDTO{}, err
@@ -92,36 +90,6 @@ func (d *GetDaySessionService) GetDaySession(ctx context.Context, daysessionid c
 	if matchedStop == nil {
 		return dto.DaySessionResponseDTO{}, fmt.Errorf("matching plan stop not found")
 	}
-
-	// err = json.Unmarshal(latestEvent.Payload(), &payload)
-	// if err != nil {
-	// 	return dto.DaySessionResponseDTO{}, err
-	// }
-
-	// planStopID, ok := payload["plan_stop_id"].(string)
-	// if !ok {
-	// 	return dto.DaySessionResponseDTO{}, fmt.Errorf("plan_stop_id not found in payload")
-	// }
-
-	// for _, stop := range planStops {
-	// 	if stop.ID().Value() == planStopID {
-	// 		matchedStop = stop
-	// 		break
-	// 	}
-	// }
-
-	// var planStopID string
-	// planStopID, err := latestEvent.PlanStopID()
-	// if err != nil {
-	// 	return dto.DaySessionResponseDTO{}, err
-	// }
-
-	// for _, stop := range planStops {
-	// 	if stop.ID == planStopID {
-	//     	matchedStop = stop
-	//     	break
-	// 	}
-	// }
 
 	plannedArrival := matchedStop.PlannedArrival()
 	actualArrival := latestEvent.TS()

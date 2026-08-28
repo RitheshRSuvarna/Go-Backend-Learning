@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"llmclient"
 	"log"
 	"net/http"
 	"os"
 	"time"
-	"llmclient"
 
 	assistantsuggservice "assistant_suggestions/application/services"
 	assistantsuggrepository "assistant_suggestions/infrastructure/driven/postgres/repository"
@@ -91,8 +91,9 @@ func main() {
 
 	mux.Handle("/swagger/", httpSwagger.WrapHandler)
 	mux.Handle("/api/trips", http.StripPrefix("/api", initTripHandler(db)))
+	mux.Handle("/api/trips/{trip_id}/itinerary", http.StripPrefix("/api", initTripHandler(db)))
 	mux.Handle("/api/day-sessions/{trip_id}", http.StripPrefix("/api", initDaySessionHandler(db, llmClient)))
-	mux.Handle("/api/day-session/{id}", http.StripPrefix("/api", initDaySessionHandler(db, llmClient)))
+	mux.Handle("/api/day-sessions/{id}/itinerary", http.StripPrefix("/api", initDaySessionHandler(db, llmClient)))
 	mux.Handle("/api/day-sessions/{id}/llm/plan", http.StripPrefix("/api", initDaySessionHandler(db, llmClient)))
 	mux.Handle("/api/day-sessions/{id}/llm/replan", http.StripPrefix("/api", initDaySessionHandler(db, llmClient)))
 	mux.Handle("/api/day-sessions/{id}/plan-versions", http.StripPrefix("/api", initPlanVersionHandler(db)))
@@ -149,12 +150,12 @@ func initDaySessionHandler(db *pgxpool.Pool, llmClient *llmclient.Client) http.H
 	planStopRepo := planrepository.NewPlanStopRepository(db)
 	eventRepo := eventrepository.NewEventsRepository(db)
 	createDaySessionSvc := daysessionservice.NewDaySessionService(daySessionRepo)
-	listDaySessionSvc := daysessionservice.NewGetDaySessionService(daySessionRepo, planVersionRepo, planStopRepo, eventRepo)
-	getDaySessionSvc := daysessionservice.NewListDaySessionService(daySessionRepo)
+	getDaySessionSvc := daysessionservice.NewGetDaySessionService(daySessionRepo, planVersionRepo, planStopRepo, eventRepo)
+	listDaySessionSvc := daysessionservice.NewListDaySessionService(daySessionRepo)
 	updateActivePlanSvc := daysessionservice.NewSetActivePlanService(daySessionRepo)
 	planGenerator := day_sessionai.NewPlanGenerator(llmClient)
 	generateLLMPlanSvc := daysessionservice.NewGenerateLLMPlanService(planGenerator, daySessionRepo, tripRepo, planVersionRepo, planStopRepo)
-	return daysessionrest.NewHandler(createDaySessionSvc, listDaySessionSvc, getDaySessionSvc, updateActivePlanSvc, generateLLMPlanSvc)
+	return daysessionrest.NewHandler(createDaySessionSvc, getDaySessionSvc, listDaySessionSvc, updateActivePlanSvc, generateLLMPlanSvc)
 }
 
 func initPlanVersionHandler(db *pgxpool.Pool) http.Handler {
